@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html class="light" lang="es">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: { 
+                    "primary": "#5D1927", 
+                    "background-light": "#f8f5f6", 
+                    "accent-pink": "#FEBDC6",
+                    "order-green": "#86efac",
+                    "order-orange": "#fdba74",
+                    "order-red": "#fca5a5",
+                    "order-blue": "#93c5fd",
+                    "order-purple": "#c4b5fd",
+                    "order-yellow": "#FFFF00"
+                },
+                fontFamily: { "display": ["Plus Jakarta Sans", "sans-serif"] },
+                borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+            },
+        },
+    }
+</script>
+<title>Detalles del Pedido - Nonna</title>
+</head>
+<body class="bg-[#FEBDC6] font-display min-h-screen flex items-center justify-center p-4">
+<div class="layout-content-container flex flex-col w-full max-w-[1024px] bg-white rounded-2xl shadow-2xl overflow-hidden my-8">
+    <div class="flex flex-wrap items-center justify-between gap-4 p-8 border-b border-slate-100 bg-white">
+        <div class="flex flex-col gap-2">
+            <div class="flex items-center gap-4">
+                <h1 id="titulo-pedido" class="text-primary text-3xl font-black tracking-tight">DETALLES DEL PEDIDO</h1>
+            </div>
+        </div>
+        <div class="flex gap-3">
+            <!-- Botón REGRESAR (nuevo) -->
+            <button onclick="window.location.href='pedidos.html'" class="bg-white hover:bg-gray-100 text-primary border-2 border-primary px-6 py-2.5 rounded-lg font-bold transition-all duration-200 flex items-center gap-2 shadow-md">
+                <span>←</span>
+                <span>REGRESAR</span>
+            </button>
+            <!-- Botón VER CALENDARIO -->
+            <button onclick="window.location.href='calendario.html'" class="bg-primary hover:bg-primary/90 text-white px-6 py-2.5 rounded-lg font-bold transition-all duration-200 flex items-center gap-2 shadow-md hover:shadow-lg">
+                <span>VER CALENDARIO</span>
+            </button>
+        </div>
+    </div>
+    <div class="p-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div class="space-y-8">
+            <div class="space-y-4">
+                <div class="grid gap-4">
+                    <div><span class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Nombre del cliente</span><p id="cliente-nombre" class="text-slate-900 font-semibold text-lg">-</p></div>
+                    <div><span class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Dirección de entrega</span><p id="direccion-texto" class="text-slate-900 font-medium leading-relaxed italic">-</p></div>
+                </div>
+            </div>
+            <div class="space-y-4">
+                <div class="flex items-center gap-3 border-b border-slate-100 pb-2">
+                    <h3 class="text-slate-900 font-extrabold text-lg uppercase tracking-tight">Comentario del Pedido</h3>
+                </div>
+                <div class="bg-slate-50 p-4 rounded-xl"><p id="comentario-pedido" class="text-slate-700 text-sm leading-relaxed">-</p></div>
+            </div>
+        </div>
+        <div class="space-y-8">
+            <div class="space-y-4">
+                <div class="flex items-center gap-3 border-b border-slate-100 pb-2">
+                    <h3 class="text-slate-900 font-extrabold text-lg uppercase tracking-tight">Detalles de Entrega</h3>
+                </div>
+                <div class="grid grid-cols-2 gap-6">
+                    <div><span class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Fecha de Pedido</span><p id="fecha-pedido" class="text-slate-900 font-bold text-lg">-</p></div>
+                    <div><span class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Fecha de Entrega</span><p id="fecha-entrega" class="text-slate-900 font-bold text-lg">-</p></div>
+                    <div><span class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Tipo de Entrega</span><p id="tipo-entrega" class="text-slate-900 font-bold text-lg">-</p></div>
+                    <div><span class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Estado</span><p id="estado-texto" class="text-slate-900 font-bold text-lg flex items-center gap-2"><span class="size-2 rounded-full"></span>-</p></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="px-8 pb-8">
+        <div class="flex items-center gap-3 border-b border-slate-100 pb-3 mb-6">
+            <h3 class="text-slate-900 font-extrabold text-lg uppercase tracking-tight">Resumen de Productos</h3>
+        </div>
+        <div class="overflow-x-auto rounded-xl border border-slate-100">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-50">
+                        <th class="px-6 py-4 text-slate-500 text-[11px] font-black uppercase tracking-widest">Producto</th>
+                        <th class="px-6 py-4 text-slate-500 text-[11px] font-black uppercase tracking-widest text-center">Cantidad</th>
+                        <th class="px-6 py-4 text-slate-500 text-[11px] font-black uppercase tracking-widest text-right">Precio Unitario</th>
+                        <th class="px-6 py-4 text-slate-500 text-[11px] font-black uppercase tracking-widest text-right">Precio Diseño</th>
+                        <th class="px-6 py-4 text-slate-500 text-[11px] font-black uppercase tracking-widest text-right">Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody id="productos-table-body" class="divide-y divide-slate-100">
+                    <tr><td colspan="5" class="text-center py-10 text-slate-400">Cargando productos...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="p-8 bg-slate-50 border-t border-slate-100 flex flex-col md:flex-row justify-between items-end gap-8">
+        <div class="w-full md:w-85 space-y-3">
+            <div class="flex justify-between items-center text-slate-500">
+                <span class="text-sm font-semibold uppercase tracking-wider">Subtotal</span>
+                <span id="subtotal-val" class="font-bold">$0.00</span>
+            </div>
+            <div class="flex justify-between items-center text-slate-500">
+                <span class="text-sm font-semibold uppercase tracking-wider">Costo de Envío</span>
+                <span id="envio-val" class="font-bold">$0.00</span>
+            </div>
+            <div class="pt-4 border-t border-slate-200 flex justify-between items-center">
+                <span class="text-primary font-black text-xl tracking-tighter">TOTAL A PAGAR</span>
+                <span id="total-val" class="text-primary font-black text-4xl tracking-tighter">$0.00</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_BASE = 'http://127.0.0.1:8000/api';
+    const TOKEN = localStorage.token;
+    function getHeaders() { return { 'accept': 'application/json', 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' }; }
+
+    // Configuración de estados con colores
+    const estadoConfig = {
+        2: { nombre: 'Pendiente', color: 'bg-order-red', textoColor: 'text-red-800', bgLight: 'bg-red-100' },
+        8: { nombre: 'Preparación', color: 'bg-order-orange', textoColor: 'text-orange-800', bgLight: 'bg-orange-100' },
+        7: { nombre: 'En camino', color: 'bg-order-blue', textoColor: 'text-blue-800', bgLight: 'bg-blue-100' },
+        5: { nombre: 'Entregado', color: 'bg-order-green', textoColor: 'text-green-800', bgLight: 'bg-green-100' },
+        6: { nombre: 'Cancelado', color: 'bg-order-purple', textoColor: 'text-purple-800', bgLight: 'bg-purple-100' },
+        3: { nombre: 'En proceso', color: 'bg-order-yellow', textoColor: 'text-yellow-800', bgLight: 'bg-yellow-100' }
+    };
+
+    function getColorPorEstado(idEstado) {
+        return estadoConfig[idEstado]?.bgLight || 'bg-gray-100';
+    }
+
+    function getTextoColorEstado(idEstado) {
+        return estadoConfig[idEstado]?.textoColor || 'text-gray-800';
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const pedidoId = urlParams.get('id');
+    if (!pedidoId) { alert('No se especificó pedido'); window.location.href = 'pedidos.html'; }
+
+    async function obtenerPedido() {
+        const res = await fetch(`${API_BASE}/pedidos/${pedidoId}`, { headers: getHeaders() });
+        if (!res.ok) throw new Error('Pedido no encontrado');
+        return res.json();
+    }
+
+    async function obtenerProducto(idProducto) {
+        try {
+            const res = await fetch(`${API_BASE}/producto/${idProducto}`, { headers: getHeaders() });
+            if (!res.ok) return null;
+            return res.json();
+        } catch (error) {
+            console.error(`Error al cargar producto ${idProducto}:`, error);
+            return null;
+        }
+    }
+
+    async function obtenerCotizacion(idCotizacion) {
+        try {
+            const res = await fetch(`${API_BASE}/cotizacion/${idCotizacion}`, { headers: getHeaders() });
+            if (!res.ok) {
+                console.error('Error al obtener cotización:', res.status);
+                return null;
+            }
+            return res.json();
+        } catch (error) {
+            console.error('Error al cargar cotización:', error);
+            return null;
+        }
+    }
+
+    async function cargarPagina() {
+        try {
+            // Obtener datos del pedido
+            const pedido = await obtenerPedido();
+            const estadoInfo = estadoConfig[pedido.id_estado] || { 
+                nombre: pedido.estado || 'Desconocido', 
+                bgLight: 'bg-gray-100', 
+                textoColor: 'text-gray-800',
+                color: 'bg-gray-500'
+            };
+            
+            // Actualizar título
+            document.getElementById('titulo-pedido').innerText = `DETALLES DEL PEDIDO #${pedido.id_pedido}`;
+            
+            // Información del cliente y dirección
+            document.getElementById('cliente-nombre').innerText = pedido.cliente || 'No especificado';
+            document.getElementById('direccion-texto').innerText = pedido.direccion || 'No especificada';
+            document.getElementById('comentario-pedido').innerText = pedido.comentario || 'Sin comentarios';
+            
+            // Fechas y tipo de entrega
+            document.getElementById('fecha-pedido').innerText = pedido.fecha_pedido ? new Date(pedido.fecha_pedido).toLocaleDateString() : '-';
+            document.getElementById('fecha-entrega').innerText = pedido.fecha_entrega ? new Date(pedido.fecha_entrega).toLocaleDateString() : '-';
+            
+            // Tipo de entrega con estilo visual
+            const tipoEntregaElement = document.getElementById('tipo-entrega');
+            if (pedido.tipo_entrega) {
+                tipoEntregaElement.innerHTML = '<span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm">🚚 A domicilio</span>';
+            } else {
+                tipoEntregaElement.innerHTML = '<span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">🏪 Recoger en tienda</span>';
+            }
+            
+            // Estado con círculo de color
+            const estadoTexto = document.getElementById('estado-texto');
+            const colorCirculo = estadoConfig[pedido.id_estado]?.color || 'bg-gray-500';
+            estadoTexto.innerHTML = `<span class="size-2 rounded-full ${colorCirculo}"></span> ${estadoInfo.nombre}`;
+            
+            // Procesar productos
+            let subtotalCalculado = 0;
+            const tbody = document.getElementById('productos-table-body');
+            
+            if (pedido.productos && pedido.productos.length > 0) {
+                tbody.innerHTML = '';
+                
+                // Para cada producto, obtener su precio unitario
+                for (const item of pedido.productos) {
+                    const productoInfo = await obtenerProducto(item.id_producto);
+                    const cantidad = item.cantidad || 0;
+                    const precioDisenio = parseFloat(item.precio_disenio) || 0;
+                    const precioBase = productoInfo ? parseFloat(productoInfo.precio_unitario) : 0;
+                    const precioUnitario = precioBase + precioDisenio;
+                    const subtotal = cantidad * precioUnitario;
+                    subtotalCalculado += subtotal;
+                    
+                    const imagenUrl = productoInfo?.image_url || productoInfo?.imagen;
+                    const descripcion = productoInfo?.descripcion || 'Sin descripción';
+                    
+                    tbody.insertAdjacentHTML('beforeend', `
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="px-6 py-5">
+                                <div class="flex items-center gap-4">
+                                    <div class="size-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary overflow-hidden">
+                                        ${imagenUrl ? 
+                                            `<img src="http://127.0.0.1:8000${imagenUrl}" alt="${item.producto}" class="w-full h-full object-cover">` : 
+                                            `<span class="material-symbols-outlined">cake</span>`
+                                        }
+                                    </div>
+                                    <div>
+                                        <p class="text-slate-900 font-bold">${item.producto || 'Producto ' + item.id_producto}</p>
+                                        <p class="text-slate-400 text-xs">${descripcion}</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-5 text-center text-slate-900 font-bold text-lg">${cantidad}</td>
+                            <td class="px-6 py-5 text-right text-slate-600 font-medium">$${precioBase.toFixed(2)}</td>
+                            <td class="px-6 py-5 text-right text-primary font-bold">$${precioDisenio.toFixed(2)}</td>
+                            <td class="px-6 py-5 text-right text-slate-900 font-extrabold text-lg">$${subtotal.toFixed(2)}</td>
+                        </td>
+                    `);
+                }
+            } else {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-slate-400">No hay productos asociados a este pedido</td></tr>';
+            }
+            
+            // Usar los subtotales del pedido o los calculados
+            const subtotal = parseFloat(pedido.subtotal || subtotalCalculado);
+            const total = parseFloat(pedido.total || 0);
+            const costoEnvio = total - subtotal;
+            
+            document.getElementById('subtotal-val').innerText = `$${subtotal.toFixed(2)}`;
+            document.getElementById('envio-val').innerText = `$${costoEnvio.toFixed(2)}`;
+            document.getElementById('total-val').innerText = `$${total.toFixed(2)}`;
+            
+            
+            
+        } catch (error) {
+            console.error('Error al cargar la página:', error);
+            alert('Error al cargar el pedido: ' + error.message);
+            window.location.href = 'pedidos.html';
+        }
+    }
+    
+    cargarPagina();
+</script>
+</body>
+</html>

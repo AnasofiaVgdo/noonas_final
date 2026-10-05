@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html class="light" lang="es">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<script>
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: {
+                    "primary": "#5d1927",
+                    "background-light": "#f8f6f6",
+                    "background-dark": "#1f1316",
+                    "brand-pink": "#FEBDC6",
+                },
+                fontFamily: { "display": ["Plus Jakarta Sans"] },
+                borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+            },
+        },
+    }
+</script>
+<style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #FEBDC6; }
+    .modal-mensaje {
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+</style>
+</head>
+<body class="bg-brand-pink min-h-screen flex items-center justify-center p-4">
+<div class="relative w-full max-w-[1280px] h-full max-h-[960px] bg-background-light dark:bg-background-dark rounded-xl shadow-2xl overflow-hidden flex flex-col">
+    <header class="flex items-center justify-between border-b border-primary/10 px-10 py-6 bg-white dark:bg-background-dark">
+        <div class="flex items-center gap-4 text-primary">
+            <div class="size-8 bg-primary rounded-lg flex items-center justify-center text-white">
+                <span style="font-size:1.25rem;">🍞</span>
+            </div>
+            <h2 class="text-primary text-2xl font-bold leading-tight tracking-tight">Nonna</h2>
+        </div>
+        <a href="productos.html" class="flex items-center justify-center rounded-full h-10 w-10 bg-primary/10 text-primary hover:bg-primary/20 transition-colors">
+            <span style="font-size:1.25rem;">✕</span>
+        </a>
+    </header>
+    <main class="flex-1 overflow-y-auto p-10">
+        <div class="max-w-4xl mx-auto">
+            <div class="mb-8">
+                <h1 class="text-slate-900 dark:text-slate-100 text-4xl font-extrabold tracking-tight">Editar Producto</h1>
+                <p class="text-primary/70 mt-2">Modifique los detalles del producto y guarde los cambios.</p>
+            </div>
+            <div class="bg-white dark:bg-background-dark/50 rounded-xl border border-primary/5 p-8 shadow-sm">
+                <form id="form-editar" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="flex flex-col gap-2">
+                            <label class="text-primary font-semibold text-sm uppercase tracking-wider">ID del Producto</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-primary/50">🔍</span>
+                                <input id="id_producto" class="w-full pl-11 pr-4 py-4 rounded-lg bg-primary/5 border-transparent text-primary font-medium cursor-not-allowed focus:ring-0 focus:border-transparent" readonly type="text">
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <label class="text-primary font-semibold text-sm uppercase tracking-wider">Receta</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-primary">📖</span>
+                                <select id="id_receta" class="w-full pl-11 pr-4 py-4 rounded-lg border-primary/20 bg-white dark:bg-background-dark text-slate-900 dark:text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary transition-all" required>
+                                    <option value="">Cargando recetas...</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-2 md:col-span-2">
+                            <label class="text-primary font-semibold text-sm uppercase tracking-wider">Descripción del Producto</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-primary">📝</span>
+                                <input id="descripcion" class="w-full pl-11 pr-4 py-4 rounded-lg border-primary/20 bg-white dark:bg-background-dark text-slate-900 dark:text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary transition-all" type="text" required>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <label class="text-primary font-semibold text-sm uppercase tracking-wider">Precio Unitario</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-primary font-bold">$</span>
+                                <input id="precio_unitario" class="w-full pl-11 pr-4 py-4 rounded-lg border-primary/20 bg-white dark:bg-background-dark text-slate-900 dark:text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary transition-all" type="number" step="1" required>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <label class="text-primary font-semibold text-sm uppercase tracking-wider">Categoría</label>
+                            <select id="id_categoria" class="w-full px-4 py-4 rounded-lg border-primary/20 bg-white dark:bg-background-dark text-slate-900 dark:text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary transition-all" required>
+                                <option value="">Cargando categorías...</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+    <footer class="border-t border-primary/10 p-8 bg-white dark:bg-background-dark flex justify-end gap-4">
+        <a href="productos.html" class="px-8 py-3 rounded-lg border-2 border-primary/20 text-primary font-bold hover:bg-primary/5 transition-colors">Cancelar</a>
+        <button type="submit" form="form-editar" id="btn-submit" class="px-8 py-3 rounded-lg bg-primary text-white font-bold shadow-lg shadow-primary/30 hover:bg-primary/90 transition-all flex items-center gap-2">
+            <span>💾</span> Guardar Cambios
+        </button>
+    </footer>
+</div>
+
+<!-- MODAL DE ÉXITO (centrado) -->
+<div id="modal-exito" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4">
+            <span class="material-symbols-outlined text-green-600 text-5xl"></span>
+        </div>
+        <h3 class="text-xl font-bold text-slate-900">¡Producto actualizado!</h3>
+        <p class="text-slate-500 mt-2">Los cambios se han guardado correctamente.</p>
+        <button id="btn-cerrar-exito" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Continuar</button>
+    </div>
+</div>
+
+<!-- MODAL DE ERROR -->
+<div id="modal-error" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4">
+            <span class="material-symbols-outlined text-red-600 text-5xl">error</span>
+        </div>
+        <h3 class="text-xl font-bold text-slate-900">Error</h3>
+        <p id="error-mensaje" class="text-slate-500 mt-2"></p>
+        <button id="btn-cerrar-error" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Aceptar</button>
+    </div>
+</div>
+
+<!-- MODAL DE VALIDACIÓN (advertencia) -->
+<div id="modal-warning" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4">
+            <span class="material-symbols-outlined text-amber-600 text-5xl"></span>
+        </div>
+        <h3 class="text-xl font-bold text-slate-900">Advertencia</h3>
+        <p id="warning-mensaje" class="text-slate-500 mt-2"></p>
+        <button id="btn-cerrar-warning" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Aceptar</button>
+    </div>
+</div>
+
+<script>
+    const API_BASE = 'http://127.0.0.1:8000/api';
+    const TOKEN = localStorage.getItem('token') || localStorage.getItem('Token') || localStorage.token;
+
+    function getHeaders() {
+        return {
+            'accept': 'application/json',
+            'Authorization': `Bearer ${TOKEN}`,
+            'Content-Type': 'application/json'
+        };
+    }
+
+    // Funciones de modales
+    function mostrarExito(callback) {
+        const modal = document.getElementById('modal-exito');
+        modal.classList.remove('hidden');
+        document.getElementById('btn-cerrar-exito').onclick = () => {
+            modal.classList.add('hidden');
+            if (callback) callback();
+        };
+    }
+
+    function mostrarError(mensaje) {
+        const modal = document.getElementById('modal-error');
+        document.getElementById('error-mensaje').innerText = mensaje;
+        modal.classList.remove('hidden');
+        document.getElementById('btn-cerrar-error').onclick = () => modal.classList.add('hidden');
+    }
+
+    function mostrarWarning(mensaje) {
+        const modal = document.getElementById('modal-warning');
+        document.getElementById('warning-mensaje').innerText = mensaje;
+        modal.classList.remove('hidden');
+        document.getElementById('btn-cerrar-warning').onclick = () => modal.classList.add('hidden');
+    }
+
+    if (!TOKEN) {
+        mostrarError('No hay sesión activa. Redirigiendo al login...');
+        setTimeout(() => window.location.href = '/index.html', 1500);
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const productoId = urlParams.get('id');
+    if (!productoId) {
+        mostrarError('No se especificó qué producto editar');
+        setTimeout(() => window.location.href = 'productos.html', 1500);
+    }
+
+    let descripcionOriginal = '';
+
+    async function cargarCategorias(valorSeleccionado) {
+        try {
+            const res = await fetch(`${API_BASE}/categoria/categorias/`, { headers: getHeaders() });
+            if (!res.ok) throw new Error();
+            const categorias = await res.json();
+            const select = document.getElementById('id_categoria');
+            select.innerHTML = '<option value="">Seleccione una categoría</option>';
+            categorias.forEach(cat => {
+                const opt = document.createElement('option');
+                opt.value = cat.id_categoria;
+                opt.textContent = cat.descripcion || `Categoría ${cat.id_categoria}`;
+                if (valorSeleccionado && cat.id_categoria == valorSeleccionado) opt.selected = true;
+                select.appendChild(opt);
+            });
+        } catch (error) {
+            document.getElementById('id_categoria').innerHTML = '<option value="">Error al cargar categorías</option>';
+            mostrarError('Error al cargar categorías');
+        }
+    }
+
+    async function cargarRecetas(valorSeleccionado) {
+        try {
+            const res = await fetch(`${API_BASE}/receta/recetas/`, { headers: getHeaders() });
+            if (!res.ok) throw new Error();
+            const recetas = await res.json();
+            const select = document.getElementById('id_receta');
+            select.innerHTML = '<option value="">Seleccione una receta</option>';
+            recetas.forEach(rec => {
+                const opt = document.createElement('option');
+                opt.value = rec.id_receta;
+                opt.textContent = rec.descripcion || `Receta ${rec.id_receta}`;
+                if (valorSeleccionado && rec.id_receta == valorSeleccionado) opt.selected = true;
+                select.appendChild(opt);
+            });
+        } catch (error) {
+            document.getElementById('id_receta').innerHTML = '<option value="">Error al cargar recetas</option>';
+            mostrarError('Error al cargar recetas');
+        }
+    }
+
+    async function obtenerProducto(id) {
+        const res = await fetch(`${API_BASE}/producto/${id}`, { headers: getHeaders() });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+    }
+
+    // Verificar duplicado excluyendo el producto actual
+    async function verificarProductoDuplicado(descripcion, idActual) {
+        try {
+            const res = await fetch(`${API_BASE}/producto/`, { headers: getHeaders() });
+            if (!res.ok) return false;
+            const productos = await res.json();
+            return productos.some(p => p.descripcion.toLowerCase() === descripcion.toLowerCase() && p.id_producto != idActual);
+        } catch (e) {
+            return false;
+        }
+    }
+
+    async function actualizarProducto(id, datos) {
+        const res = await fetch(`${API_BASE}/producto/${id}`, {
+            method: 'PUT',
+            headers: getHeaders(),
+            body: JSON.stringify(datos)
+        });
+        if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.detail || 'Error al actualizar');
+        }
+        return res.json();
+    }
+
+    async function cargarDatos() {
+        try {
+            const prod = await obtenerProducto(productoId);
+            descripcionOriginal = prod.descripcion;
+            document.getElementById('id_producto').value = prod.id_producto;
+            document.getElementById('descripcion').value = prod.descripcion || '';
+            document.getElementById('precio_unitario').value = prod.precio_unitario || '';
+            await cargarCategorias(prod.id_categoria);
+            await cargarRecetas(prod.id_receta);
+        } catch (error) {
+            mostrarError('Error al cargar el producto: ' + error.message);
+            setTimeout(() => window.location.href = 'productos.html', 1500);
+        }
+    }
+
+    document.getElementById('form-editar').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const descripcion = document.getElementById('descripcion').value.trim();
+        const precio_unitario = parseInt(document.getElementById('precio_unitario').value, 10);
+        const id_categoria = parseInt(document.getElementById('id_categoria').value);
+        const id_receta = parseInt(document.getElementById('id_receta').value);
+
+        if (!descripcion) { mostrarWarning('La descripción es obligatoria'); return; }
+        if (isNaN(precio_unitario) || precio_unitario <= 0) { mostrarWarning('Precio válido requerido'); return; }
+        if (!id_categoria) { mostrarWarning('Seleccione una categoría'); return; }
+        if (!id_receta) { mostrarWarning('Seleccione una receta'); return; }
+
+        // Verificar duplicado si la descripción cambió
+        if (descripcion !== descripcionOriginal) {
+            const duplicado = await verificarProductoDuplicado(descripcion, productoId);
+            if (duplicado) {
+                mostrarWarning('Ya existe un producto con esa descripción. Por favor, elija otro nombre.');
+                return;
+            }
+        }
+
+        let prodOriginal;
+        try {
+            prodOriginal = await obtenerProducto(productoId);
+        } catch (error) {
+            mostrarError('Error al obtener datos actuales: ' + error.message);
+            return;
+        }
+
+        const datos = {
+            id_categoria,
+            id_receta,
+            descripcion,
+            precio_unitario,
+            imagen: prodOriginal.imagen || "",
+            activo: prodOriginal.activo
+        };
+
+        const btn = document.getElementById('btn-submit');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<span class="material-symbols-outlined animate-spin"></span> Guardando...';
+        btn.disabled = true;
+
+        try {
+            await actualizarProducto(productoId, datos);
+            mostrarExito(() => {
+                window.location.href = 'productos.html';
+            });
+        } catch (error) {
+            mostrarError('Error al actualizar: ' + error.message);
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    });
+
+    cargarDatos();
+</script>
+</body>
+</html>

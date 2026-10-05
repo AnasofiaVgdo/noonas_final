@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+<script>
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: {
+                    "primary": "#5d1927",
+                    "background-light": "#f8f6f6",
+                    "accent-pink": "#FEBDC6",
+                },
+                fontFamily: { "sans": ["Montserrat", "sans-serif"] },
+                borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px" },
+            },
+        },
+    }
+</script>
+<style>
+    body { font-family: "Montserrat", sans-serif; }
+    .modal-mensaje { transition: opacity 0.3s ease, visibility 0.3s ease; }
+    .custom-select {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%235d1927' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+        background-position: right 0.75rem center;
+        background-repeat: no-repeat;
+        background-size: 1.25em 1.25em;
+    }
+</style>
+</head>
+<body class="bg-[#FEBDC6] min-h-screen flex items-center justify-center p-4">
+<div class="bg-white w-full max-w-[1280px] max-h-[960px] rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+    <!-- Header -->
+    <header class="flex items-center justify-between border-b border-slate-100 px-10 py-6 bg-white">
+        <div class="flex items-center gap-4">
+            <div class="bg-primary/10 p-3 rounded-xl text-primary">
+                <span class="material-symbols-outlined text-3xl">cake</span>
+            </div>
+            <div>
+                <h1 class="text-slate-900 text-2xl font-extrabold tracking-tight">Agregar Nuevo Producto</h1>
+                <p class="text-slate-500 text-sm">Complete los detalles para añadir un nuevo producto al catálogo.</p>
+            </div>
+        </div>
+        <a href="productos.html" class="text-slate-400 hover:text-slate-600 transition-colors">
+            <span class="material-symbols-outlined">close</span>
+        </a>
+    </header>
+
+    <main class="flex-1 overflow-y-auto p-10 bg-slate-50/50">
+        <div class="max-w-3xl mx-auto space-y-8">
+
+            <!-- Vista previa de imagen -->
+            <section class="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm">
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="material-symbols-outlined text-primary">image</span>
+                    <h2 class="text-lg font-bold text-slate-900">Imagen del Producto *</h2>
+                </div>
+                <div class="relative w-full h-44 rounded-xl overflow-hidden border border-slate-100 bg-slate-50 flex items-center justify-center mb-4">
+                    <img id="preview-imagen" class="w-full h-full object-cover hidden" alt="Vista previa">
+                    <div id="placeholder-imagen" class="flex flex-col items-center justify-center text-slate-300 gap-2">
+                        <span class="material-symbols-outlined text-5xl">image</span>
+                        <span class="text-sm font-medium">Seleccione una imagen</span>
+                    </div>
+                </div>
+                <input type="file" id="imagen" accept="image/jpeg,image/png,image/jpg"
+                    class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-5 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 transition-all cursor-pointer">
+                <p class="text-xs text-slate-400 mt-2">Formatos aceptados: JPG, PNG · Máximo 5MB · La imagen es obligatoria</p>
+            </section>
+
+            <!-- Información del producto -->
+            <section class="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm">
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="material-symbols-outlined text-primary">info</span>
+                    <h2 class="text-lg font-bold text-slate-900">Información del Producto</h2>
+                </div>
+                <form id="form-producto" class="grid grid-cols-1 gap-6">
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-bold text-slate-700">Descripción *</label>
+                        <input id="descripcion" class="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="Ej. Tiramisú de la Casa" type="text" required>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="flex flex-col gap-2">
+                            <label class="text-sm font-bold text-slate-700">Receta *</label>
+                            <select id="id_receta" class="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all custom-select" required>
+                                <option disabled selected value="">Cargando recetas...</option>
+                            </select>
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <label class="text-sm font-bold text-slate-700">Categoría *</label>
+                            <select id="id_categoria" class="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all custom-select" required>
+                                <option disabled selected value="">Cargando categorías...</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-bold text-slate-700">Precio Unitario *</label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-semibold">$</span>
+                            <input id="precio_unitario" class="w-full rounded-xl border-slate-200 bg-slate-50 pl-8 pr-4 py-3 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="0" step="1" type="number" required>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <input type="checkbox" id="activo" class="w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary" checked>
+                        <label for="activo" class="text-sm font-bold text-slate-700">Producto activo</label>
+                    </div>
+                </form>
+            </section>
+        </div>
+    </main>
+
+    <footer class="border-t border-slate-100 p-8 flex justify-end gap-4 bg-white">
+        <a href="productos.html" class="px-8 py-3 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-all">Cancelar</a>
+        <button type="submit" form="form-producto" id="btn-submit" class="px-10 py-3 rounded-xl bg-primary text-white font-bold hover:bg-primary/95 transition-all shadow-lg shadow-primary/30 flex items-center gap-2">
+            <span class="material-symbols-outlined">check_circle</span> Confirmar Producto
+        </button>
+    </footer>
+</div>
+
+<!-- MODAL DE ÉXITO -->
+<div id="modal-exito" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4"><span class="material-symbols-outlined text-green-600 text-5xl">check_circle</span></div>
+        <h3 class="text-xl font-bold text-slate-900" id="modal-titulo">Producto creado</h3>
+        <p class="text-slate-500 mt-2" id="modal-mensaje"></p>
+        <button id="btn-cerrar-modal" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Continuar</button>
+    </div>
+</div>
+
+<!-- MODAL DE ERROR -->
+<div id="modal-error" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4"><span class="material-symbols-outlined text-red-600 text-5xl">error</span></div>
+        <h3 class="text-xl font-bold text-slate-900">Error</h3>
+        <p class="text-slate-500 mt-2" id="error-mensaje"></p>
+        <button id="btn-cerrar-error" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Cerrar</button>
+    </div>
+</div>
+
+<!-- MODAL DE ADVERTENCIA (para imagen obligatoria) -->
+<div id="modal-warning" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4"><span class="material-symbols-outlined text-amber-600 text-5xl">warning</span></div>
+        <h3 class="text-xl font-bold text-slate-900">Aviso</h3>
+        <p class="text-slate-500 mt-2" id="warning-mensaje"></p>
+        <button id="btn-cerrar-warning" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Aceptar</button>
+    </div>
+</div>
+
+<script>
+    const API_BASE = 'http://127.0.0.1:8000/api';
+    const TOKEN = localStorage.token;
+
+    function getHeaders() {
+        return { 'accept': 'application/json', 'Authorization': `Bearer ${TOKEN}` };
+    }
+
+    function mostrarExito(titulo, mensaje, urlRedireccion) {
+        const modal = document.getElementById('modal-exito');
+        document.getElementById('modal-titulo').innerText = titulo;
+        document.getElementById('modal-mensaje').innerText = mensaje;
+        modal.classList.remove('hidden');
+        const btn = document.getElementById('btn-cerrar-modal');
+        btn.onclick = () => { modal.classList.add('hidden'); if (urlRedireccion) window.location.href = urlRedireccion; };
+    }
+
+    function mostrarError(mensaje) {
+        const modal = document.getElementById('modal-error');
+        document.getElementById('error-mensaje').innerText = mensaje;
+        modal.classList.remove('hidden');
+        document.getElementById('btn-cerrar-error').onclick = () => modal.classList.add('hidden');
+    }
+
+    function mostrarWarning(mensaje) {
+        const modal = document.getElementById('modal-warning');
+        document.getElementById('warning-mensaje').innerText = mensaje;
+        modal.classList.remove('hidden');
+        document.getElementById('btn-cerrar-warning').onclick = () => modal.classList.add('hidden');
+    }
+
+    const inputImagen = document.getElementById('imagen');
+    const previewImg = document.getElementById('preview-imagen');
+    const placeholderDiv = document.getElementById('placeholder-imagen');
+
+    inputImagen.addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            // Validar tamaño (máximo 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                mostrarWarning('La imagen no puede superar los 5MB. Por favor, selecciona una imagen más pequeña.');
+                inputImagen.value = '';
+                previewImg.classList.add('hidden');
+                placeholderDiv.classList.remove('hidden');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImg.src = e.target.result;
+                previewImg.classList.remove('hidden');
+                placeholderDiv.classList.add('hidden');
+            };
+            reader.readAsDataURL(file);
+        } else {
+            previewImg.classList.add('hidden');
+            placeholderDiv.classList.remove('hidden');
+        }
+    });
+
+    async function cargarCategorias() {
+        try {
+            const res = await fetch(`${API_BASE}/categoria/categorias/`, { headers: getHeaders() });
+            if (!res.ok) throw new Error();
+            const categorias = await res.json();
+            const select = document.getElementById('id_categoria');
+            select.innerHTML = '<option disabled selected value="">Seleccionar categoría...</option>';
+            categorias.forEach(cat => {
+                const opt = document.createElement('option');
+                opt.value = cat.id_categoria;
+                opt.textContent = cat.descripcion || `Categoría ${cat.id_categoria}`;
+                select.appendChild(opt);
+            });
+        } catch (error) {
+            document.getElementById('id_categoria').innerHTML = '<option disabled>Error al cargar</option>';
+            mostrarError('Error al cargar las categorías');
+        }
+    }
+
+    async function cargarRecetas() {
+        try {
+            const res = await fetch(`${API_BASE}/receta/recetas/`, { headers: getHeaders() });
+            if (!res.ok) throw new Error();
+            const recetas = await res.json();
+            const select = document.getElementById('id_receta');
+            select.innerHTML = '<option disabled selected value="">Seleccionar receta...</option>';
+            recetas.forEach(rec => {
+                const opt = document.createElement('option');
+                opt.value = rec.id_receta;
+                opt.textContent = rec.descripcion || `Receta ${rec.id_receta}`;
+                select.appendChild(opt);
+            });
+        } catch (error) {
+            document.getElementById('id_receta').innerHTML = '<option disabled>Error al cargar</option>';
+            mostrarError('Error al cargar las recetas');
+        }
+    }
+
+    async function verificarProductoDuplicado(descripcion) {
+        try {
+            const res = await fetch(`${API_BASE}/producto/`, { headers: getHeaders() });
+            if (!res.ok) return false;
+            const productos = await res.json();
+            return productos.some(p => p.descripcion.toLowerCase() === descripcion.toLowerCase());
+        } catch (e) { return false; }
+    }
+
+    async function crearProducto(datos) {
+        const res = await fetch(`${API_BASE}/producto/`, {
+            method: 'POST',
+            headers: { 'accept': 'application/json', 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify(datos)
+        });
+        if (!res.ok) { const err = await res.json(); throw new Error(err.detail || 'Error al crear el producto'); }
+        return res.json();
+    }
+
+    async function subirImagenProducto(idProducto, archivoImagen) {
+        const formData = new FormData();
+        formData.append('imagen', archivoImagen);
+        const res = await fetch(`${API_BASE}/producto/${idProducto}/imagen`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${TOKEN}` },
+            body: formData
+        });
+        if (!res.ok) { const err = await res.json(); throw new Error(err.detail || 'Error al subir la imagen'); }
+        return res.json();
+    }
+
+    document.getElementById('form-producto').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        // ✅ VALIDACIÓN: LA IMAGEN ES OBLIGATORIA
+        if (!inputImagen.files.length || inputImagen.files.length === 0) {
+            mostrarWarning('La imagen del producto es obligatoria. Por favor, selecciona una imagen.');
+            return;
+        }
+
+        const descripcion = document.getElementById('descripcion').value.trim();
+        const id_categoria = parseInt(document.getElementById('id_categoria').value);
+        const id_receta = parseInt(document.getElementById('id_receta').value);
+        const precio_unitario = parseInt(document.getElementById('precio_unitario').value, 10);
+        const activo = document.getElementById('activo').checked;
+
+        if (!descripcion) { mostrarError('La descripción es obligatoria'); return; }
+        if (!id_categoria) { mostrarError('Seleccione una categoría'); return; }
+        if (!id_receta) { mostrarError('Seleccione una receta'); return; }
+        if (isNaN(precio_unitario) || precio_unitario <= 0) { mostrarError('Precio válido requerido'); return; }
+
+        const duplicado = await verificarProductoDuplicado(descripcion);
+        if (duplicado) { mostrarWarning('Ya existe un producto con esa descripción. Por favor, elija otro nombre.'); return; }
+
+        const datosProducto = { id_categoria, id_receta, descripcion, precio_unitario, imagen: "", activo };
+        const btn = document.getElementById('btn-submit');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<span class="material-symbols-outlined animate-spin text-lg">progress_activity</span> Guardando...';
+        btn.disabled = true;
+
+        try {
+            const nuevoProducto = await crearProducto(datosProducto);
+            await subirImagenProducto(nuevoProducto.id_producto, inputImagen.files[0]);
+            mostrarExito('¡Producto creado!', 'Producto e imagen guardados correctamente.', 'productos.html');
+        } catch (error) {
+            let errorMsg = error.message;
+            if (errorMsg.includes('duplicate') || errorMsg.toLowerCase().includes('unique')) errorMsg = 'Ya existe un producto con esa descripción.';
+            mostrarError('Error al crear el producto: ' + errorMsg);
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    });
+
+    cargarCategorias();
+    cargarRecetas();
+</script>
+</body>
+</html>

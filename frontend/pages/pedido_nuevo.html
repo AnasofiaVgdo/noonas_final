@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Nuevo Pedido - Nonna</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+<script>
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: { "primary": "#5d1927", "accent-pink": "#FEBDC6" },
+                fontFamily: { "sans": ["Montserrat", "sans-serif"] },
+                borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px" },
+            },
+        },
+    }
+</script>
+<style>
+    body { font-family: "Montserrat", sans-serif; background-color: #FEBDC6; }
+    .modal-overlay { background-color: rgba(0,0,0,0.5); backdrop-filter: blur(2px); }
+    .modal-mensaje {
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    .custom-select {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%235d1927' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+        background-position: right 0.75rem center;
+        background-repeat: no-repeat;
+        background-size: 1.25em 1.25em;
+    }
+</style>
+</head>
+<body class="bg-[#FEBDC6] min-h-screen flex items-center justify-center p-4">
+<div class="bg-white w-full max-w-[1280px] max-h-[960px] rounded-2xl shadow-2xl overflow-hidden flex flex-col lg:flex-row">
+
+    <!-- Panel principal -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+        <header class="flex items-center justify-between border-b border-slate-100 px-10 py-6 bg-white flex-shrink-0">
+            <div class="flex items-center gap-4">
+                <div class="bg-primary/10 p-3 rounded-xl text-primary">
+                    <span class="material-symbols-outlined text-3xl">shopping_bag</span>
+                </div>
+                <div>
+                    <h1 class="text-slate-900 text-2xl font-extrabold tracking-tight">Registrar Nuevo Pedido</h1>
+                    <p class="text-slate-500 text-sm">Complete los detalles para procesar la nueva orden artesanal.</p>
+                </div>
+            </div>
+            <a href="pedidos.html" class="text-slate-400 hover:text-slate-600 transition-colors">
+                <span class="material-symbols-outlined">close</span>
+            </a>
+        </header>
+
+        <main class="flex-1 overflow-y-auto p-8 bg-slate-50/50">
+            <form id="form-pedido" class="space-y-6 max-w-3xl mx-auto">
+
+                <!-- Cliente y dirección -->
+                <section class="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm">
+                    <div class="flex items-center gap-3 mb-6">
+                        <span class="material-symbols-outlined text-primary">person</span>
+                        <h2 class="text-lg font-bold text-slate-900">Cliente y Entrega</h2>
+                    </div>
+                    <div class="grid grid-cols-1 gap-6">
+                        <div class="flex flex-wrap items-end gap-4">
+                            <div class="flex-1 min-w-[200px] flex flex-col gap-2">
+                                <label class="text-sm font-bold text-slate-700">Cliente *</label>
+                                <select id="id_cliente" class="rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all custom-select" required>
+                                    <option value="">Cargando clientes...</option>
+                                </select>
+                            </div>
+                            <button type="button" id="btn-nuevo-cliente" class="h-[46px] px-5 bg-primary/10 text-primary rounded-xl font-bold text-sm hover:bg-primary/20 transition-colors flex items-center gap-2">
+                                <span class="material-symbols-outlined text-lg">person_add</span> Nuevo
+                            </button>
+                        </div>
+                        <div class="flex flex-wrap items-end gap-4">
+                            <div class="flex-1 min-w-[200px] flex flex-col gap-2">
+                                <label class="text-sm font-bold text-slate-700">Dirección *</label>
+                                <select id="id_direccion" class="rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all custom-select" required disabled>
+                                    <option value="">Primero seleccione un cliente</option>
+                                </select>
+                            </div>
+                            <button type="button" id="btn-nueva-direccion" class="h-[46px] px-5 bg-primary/10 text-primary rounded-xl font-bold text-sm hover:bg-primary/20 transition-colors flex items-center gap-2">
+                                <span class="material-symbols-outlined text-lg">add_location</span> Nueva
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div class="flex flex-col gap-2">
+                                <label class="text-sm font-bold text-slate-700">Fecha de Entrega *</label>
+                                <input id="fecha_entrega" type="date" class="rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all" required>
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <label class="text-sm font-bold text-slate-700">Estado *</label>
+                                <select id="id_estado" class="rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all custom-select" required>
+                                    <option value="">Cargando estados...</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div class="flex flex-col gap-2">
+                                <label class="text-sm font-bold text-slate-700">Tipo de Entrega *</label>
+                                <select id="tipo_entrega" class="rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all custom-select" required>
+                                    <option value="true">A domicilio</option>
+                                    <option value="false">Recoger en tienda</option>
+                                </select>
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <label class="text-sm font-bold text-slate-700">Precio de Envío</label>
+                                <div class="relative">
+                                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-semibold">$</span>
+                                    <input id="precio_envio" type="number" value="0" min="0" step="0" class="w-full rounded-xl border-slate-200 bg-slate-50 pl-8 pr-4 py-3 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Productos -->
+                <section class="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-primary">cake</span>
+                            <h2 class="text-lg font-bold text-slate-900">Productos del Pedido</h2>
+                        </div>
+                        <button type="button" id="btn-agregar-producto" class="flex items-center gap-2 text-sm font-bold text-primary hover:text-primary/80 transition-colors">
+                            <span class="material-symbols-outlined text-lg">add_circle</span> Agregar producto
+                        </button>
+                    </div>
+                    <div class="mb-4 text-xs text-slate-500 bg-slate-50 rounded-xl p-4 leading-relaxed">
+                        <strong>Producto:</strong> pastel o artículo del pedido · <strong>Cantidad:</strong> unidades solicitadas · <strong>Precio de diseño:</strong> costo extra por personalización.
+                    </div>
+                    <div id="productos-container" class="space-y-3 max-h-64 overflow-y-auto">
+                        <div class="text-center text-slate-400 py-4 text-sm">No hay productos agregados. Presione "Agregar producto".</div>
+                    </div>
+                </section>
+
+                <!-- Comentarios -->
+                <section class="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="material-symbols-outlined text-primary">comment</span>
+                        <h2 class="text-lg font-bold text-slate-900">Notas y Comentarios</h2>
+                    </div>
+                    <textarea id="comentario" class="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all resize-none" placeholder="Instrucciones especiales..." rows="3"></textarea>
+                </section>
+            </form>
+        </main>
+    </div>
+
+    <!-- Panel lateral resumen -->
+    <div class="w-full lg:w-80 border-t lg:border-t-0 lg:border-l border-slate-100 flex flex-col bg-white">
+        <div class="p-8 flex-1">
+            <h3 class="text-xl font-extrabold text-slate-900 mb-6">Resumen Financiero</h3>
+            <div class="space-y-4">
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-500 font-medium text-sm">Subtotal</span>
+                    <span id="subtotal" class="text-slate-800 font-bold">$0</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-500 font-medium text-sm">Envío</span>
+                    <span id="envio" class="text-slate-800 font-bold">$0</span>
+                </div>
+                <div class="pt-4 border-t border-slate-100 flex justify-between items-center">
+                    <span class="text-slate-800 font-extrabold">Total</span>
+                    <span id="total" class="text-2xl font-extrabold text-primary">$0</span>
+                </div>
+            </div>
+            <div class="mt-6 p-4 bg-primary/5 rounded-2xl border border-primary/10">
+                <div class="flex gap-3 items-start">
+                    <div class="bg-primary text-white p-2 rounded-xl flex-shrink-0">
+                        <span class="material-symbols-outlined text-sm">receipt_long</span>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-primary text-sm">Cotización automática</h4>
+                        <p class="text-xs text-primary/70 mt-1 leading-relaxed">Subtotal = suma de (precio × cantidad) + diseño. Se agrega el envío para el total.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="p-8 pt-4 border-t border-slate-100 space-y-3">
+            <button type="submit" form="form-pedido" id="btn-submit" class="w-full py-3 rounded-xl bg-primary text-white font-bold hover:bg-primary/95 transition-all shadow-lg shadow-primary/30 flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined">check_circle</span> Crear Pedido
+            </button>
+            <a href="pedidos.html" class="w-full py-3 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-all flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined">close</span> Cancelar
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- MODALES CENTRALES DE MENSAJES -->
+<div id="modal-exito" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4"><span class="material-symbols-outlined text-green-600 text-5xl">check_circle</span></div>
+        <h3 id="exito-titulo" class="text-xl font-bold text-slate-900">¡Éxito!</h3>
+        <p id="exito-mensaje" class="text-slate-500 mt-2"></p>
+        <button id="btn-cerrar-exito" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Continuar</button>
+    </div>
+</div>
+
+<div id="modal-error" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4"><span class="material-symbols-outlined text-red-600 text-5xl">error</span></div>
+        <h3 class="text-xl font-bold text-slate-900">Error</h3>
+        <p id="error-mensaje" class="text-slate-500 mt-2"></p>
+        <button id="btn-cerrar-error" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Aceptar</button>
+    </div>
+</div>
+
+<div id="modal-warning" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4"><span class="material-symbols-outlined text-amber-600 text-5xl">warning</span></div>
+        <h3 class="text-xl font-bold text-slate-900">Aviso</h3>
+        <p id="warning-mensaje" class="text-slate-500 mt-2"></p>
+        <button id="btn-cerrar-warning" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Aceptar</button>
+    </div>
+</div>
+
+<!-- MODALES PARA NUEVO CLIENTE Y NUEVA DIRECCIÓN -->
+<div id="modal-cliente" class="fixed inset-0 modal-overlay flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl">
+        <div class="flex items-center gap-3 mb-6">
+            <span class="material-symbols-outlined text-primary">person_add</span>
+            <h3 class="text-xl font-bold text-slate-900">Nuevo Cliente</h3>
+        </div>
+        <div class="space-y-4">
+            <input id="new_nombre" class="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="Nombre *">
+            <input id="new_apellido" class="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="Apellido *">
+            <input id="new_telefono" class="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="Teléfono">
+        </div>
+        <div class="flex justify-end gap-3 mt-6">
+            <button id="cancelar-modal-cliente" class="px-6 py-2 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-all">Cancelar</button>
+            <button id="guardar-cliente" class="px-8 py-2 rounded-xl bg-primary text-white font-bold hover:bg-primary/90 transition-all">Guardar</button>
+        </div>
+    </div>
+</div>
+
+<div id="modal-direccion" class="fixed inset-0 modal-overlay flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl">
+        <div class="flex items-center gap-3 mb-6">
+            <span class="material-symbols-outlined text-primary">add_location</span>
+            <h3 class="text-xl font-bold text-slate-900">Nueva Dirección</h3>
+        </div>
+        <input id="new_descripcion" class="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="Descripción (ej. Calle, número, colonia)">
+        <div class="flex justify-end gap-3 mt-6">
+            <button id="cancelar-modal-direccion" class="px-6 py-2 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-all">Cancelar</button>
+            <button id="guardar-direccion" class="px-8 py-2 rounded-xl bg-primary text-white font-bold hover:bg-primary/90 transition-all">Guardar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const API_BASE = 'http://127.0.0.1:8000/api';
+const TOKEN = localStorage.token;
+
+function getHeaders() {
+    return { 'accept': 'application/json', 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' };
+}
+
+function escapeHtml(value) {
+    if (value === null || value === undefined) return '';
+    return String(value).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+function mostrarExito(mensaje, callback) {
+    const modal = document.getElementById('modal-exito');
+    document.getElementById('exito-titulo').innerText = '¡Éxito!';
+    document.getElementById('exito-mensaje').innerText = mensaje;
+    modal.classList.remove('hidden');
+    document.getElementById('btn-cerrar-exito').onclick = () => {
+        modal.classList.add('hidden');
+        if (callback) callback();
+    };
+}
+
+function mostrarError(mensaje) {
+    const modal = document.getElementById('modal-error');
+    document.getElementById('error-mensaje').innerText = mensaje;
+    modal.classList.remove('hidden');
+    document.getElementById('btn-cerrar-error').onclick = () => modal.classList.add('hidden');
+}
+
+function mostrarWarning(mensaje) {
+    const modal = document.getElementById('modal-warning');
+    document.getElementById('warning-mensaje').innerText = mensaje;
+    modal.classList.remove('hidden');
+    document.getElementById('btn-cerrar-warning').onclick = () => modal.classList.add('hidden');
+}
+
+function getErrorMessage(errorData, fallback = 'Error inesperado') {
+    if (!errorData) return fallback;
+    if (typeof errorData.detail === 'string') return errorData.detail;
+    if (Array.isArray(errorData.detail)) return errorData.detail.map(e => `${Array.isArray(e.loc) ? e.loc.join('.') : ''}: ${e.msg}`).join('\n');
+    return errorData.message || fallback;
+}
+
+async function parseErrorResponse(res, fallback) {
+    try { const data = await res.json(); return getErrorMessage(data, fallback); } catch (_) { return fallback; }
+}
+
+let clientes = [], todasDirecciones = [], productosCatalogo = [], productosPedido = [];
+
+const clienteSelect = document.getElementById('id_cliente');
+const direccionSelect = document.getElementById('id_direccion');
+const estadoSelect = document.getElementById('id_estado');
+const productosContainer = document.getElementById('productos-container');
+const precioEnvioInput = document.getElementById('precio_envio');
+
+function getParameterByName(name) { return new URLSearchParams(window.location.search).get(name); }
+
+async function cargarClientes() {
+    try {
+        const res = await fetch(`${API_BASE}/cliente/`, { headers: getHeaders() });
+        if (!res.ok) throw new Error(await parseErrorResponse(res, 'Error al cargar clientes'));
+        clientes = await res.json();
+        clienteSelect.innerHTML = '<option value="">Seleccione un cliente</option>';
+        clientes.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c.id_cliente;
+            opt.textContent = `${c.nombre || ''} ${c.apellido || ''}`.trim() || `Cliente ${c.id_cliente}`;
+            clienteSelect.appendChild(opt);
+        });
+    } catch (e) { clienteSelect.innerHTML = '<option value="">Error al cargar clientes</option>'; mostrarError('Error al cargar clientes: ' + e.message); }
+}
+
+async function cargarTodasDirecciones() {
+    try {
+        const res = await fetch(`${API_BASE}/direccion/`, { headers: getHeaders() });
+        if (!res.ok) throw new Error(await parseErrorResponse(res, 'Error al cargar direcciones'));
+        todasDirecciones = await res.json();
+    } catch (e) { todasDirecciones = []; }
+}
+
+function filtrarDireccionesPorCliente(idCliente) {
+    const filtradas = todasDirecciones.filter(d => String(d.id_cliente) === String(idCliente));
+    direccionSelect.innerHTML = '<option value="">Seleccione una dirección</option>';
+    filtradas.forEach(d => {
+        const opt = document.createElement('option');
+        opt.value = d.id_direccion;
+        opt.textContent = d.descripcion || `Dirección ${d.id_direccion}`;
+        direccionSelect.appendChild(opt);
+    });
+    if (filtradas.length === 0) direccionSelect.innerHTML = '<option value="">No hay direcciones para este cliente</option>';
+    direccionSelect.disabled = false;
+}
+
+async function cargarEstados() {
+    try {
+        const res = await fetch(`${API_BASE}/estado/`, { headers: getHeaders() });
+        if (!res.ok) throw new Error(await parseErrorResponse(res, 'Error al cargar estados'));
+        const estados = await res.json();
+        estadoSelect.innerHTML = '<option value="">Seleccione un estado</option>';
+        estados.forEach(e => {
+            const opt = document.createElement('option');
+            opt.value = e.id_estado;
+            opt.textContent = e.descripcion;
+            estadoSelect.appendChild(opt);
+        });
+    } catch (e) {
+        mostrarWarning('Error al cargar estados. Usando valores de respaldo.');
+        const fallback = [{id_estado:2,descripcion:'Pendiente'},{id_estado:3,descripcion:'En proceso'},{id_estado:7,descripcion:'En camino'},{id_estado:5,descripcion:'Entregado'},{id_estado:6,descripcion:'Cancelado'}];
+        estadoSelect.innerHTML = '<option value="">Seleccione un estado</option>';
+        fallback.forEach(e => { const opt = document.createElement('option'); opt.value = e.id_estado; opt.textContent = e.descripcion; estadoSelect.appendChild(opt); });
+    }
+}
+
+async function cargarProductosCatalogo() {
+    try {
+        const res = await fetch(`${API_BASE}/producto/`, { headers: getHeaders() });
+        if (!res.ok) throw new Error(await parseErrorResponse(res, 'Error al cargar productos'));
+        productosCatalogo = await res.json();
+    } catch (e) { productosCatalogo = []; mostrarError('Error al cargar productos: ' + e.message); }
+}
+
+function getSubtotal() {
+    return productosPedido.reduce((acc, p) => acc + (Number(p.precio_unitario) * Number(p.cantidad)) + Number(p.precio_disenio), 0);
+}
+function getPrecioEnvio() { const v = Number(precioEnvioInput.value); return Number.isNaN(v) || v < 0 ? 0 : v; }
+function actualizarResumen() {
+    const subtotal = getSubtotal();
+    const envio = getPrecioEnvio();
+    document.getElementById('subtotal').innerText = `$${subtotal.toFixed(2)}`;
+    document.getElementById('envio').innerText = `$${envio.toFixed(2)}`;
+    document.getElementById('total').innerText = `$${(subtotal + envio).toFixed(2)}`;
+}
+
+function renderizarProductos() {
+    if (productosPedido.length === 0) {
+        productosContainer.innerHTML = '<div class="text-center text-slate-400 py-4 text-sm">No hay productos agregados. Presione "Agregar producto".</div>';
+        actualizarResumen(); return;
+    }
+    productosContainer.innerHTML = '';
+    productosPedido.forEach((p, idx) => {
+        const subtotalProd = (Number(p.precio_unitario) * Number(p.cantidad)) + Number(p.precio_disenio);
+        const div = document.createElement('div');
+        div.className = 'flex justify-between items-center p-4 bg-slate-50 rounded-xl border border-slate-100';
+        div.innerHTML = `
+            <div>
+                <p class="font-bold text-slate-800 text-sm">${escapeHtml(p.nombre)}</p>
+                <p class="text-xs text-slate-500 mt-1">Cant: ${escapeHtml(p.cantidad)} · Unitario: $${Number(p.precio_unitario).toFixed(2)} · Diseño: $${Number(p.precio_disenio).toFixed(2)}</p>
+            </div>
+            <div class="flex items-center gap-3 ml-4">
+                <span class="font-bold text-primary text-sm">$${subtotalProd.toFixed(2)}</span>
+                <button type="button" class="eliminar-producto text-slate-300 hover:text-red-500 transition-colors" data-idx="${idx}">
+                    <span class="material-symbols-outlined text-xl">delete</span>
+                </button>
+            </div>
+        `;
+        productosContainer.appendChild(div);
+    });
+    document.querySelectorAll('.eliminar-producto').forEach(btn => {
+        btn.addEventListener('click', () => { productosPedido.splice(parseInt(btn.dataset.idx), 1); renderizarProductos(); });
+    });
+    actualizarResumen();
+}
+
+function mostrarModalAgregarProducto() {
+    if (productosCatalogo.length === 0) { mostrarWarning('No hay productos registrados.'); return; }
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 modal-overlay flex items-center justify-center p-4 z-50';
+    modal.innerHTML = `
+        <div class="bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl">
+            <div class="flex items-center gap-3 mb-6"><span class="material-symbols-outlined text-primary">add_shopping_cart</span><h3 class="text-xl font-bold text-slate-900">Agregar Producto</h3></div>
+            <div class="space-y-4">
+                <div class="flex flex-col gap-2">
+                    <label class="text-xs font-bold text-slate-600 uppercase tracking-tight">Producto</label>
+                    <select id="select-producto" class="rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all">
+                        <option value="">Seleccione producto</option>
+                        ${productosCatalogo.map(p => `<option value="${p.id_producto}" data-precio="${p.precio_unitario || 0}" data-nombre="${escapeHtml(p.descripcion || `Producto ${p.id_producto}`)}">${escapeHtml(p.descripcion || `Producto ${p.id_producto}`)} - $${Number(p.precio_unitario || 0).toFixed(2)}</option>`).join('')}
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="flex flex-col gap-2">
+                        <label class="text-xs font-bold text-slate-600 uppercase tracking-tight">Cantidad</label>
+                        <input id="cantidad-producto" type="number" value="1" min="1" step="1" class="rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all">
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="text-xs font-bold text-slate-600 uppercase tracking-tight">Precio Diseño</label>
+                        <input id="precio-disenio-producto" type="number" value="0" min="0" step="0" class="rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all">
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-end gap-3 mt-6">
+                <button id="cancelar-producto" class="px-6 py-2 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-all">Cancelar</button>
+                <button id="confirmar-producto" class="px-8 py-2 rounded-xl bg-primary text-white font-bold hover:bg-primary/90 transition-all">Agregar</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    modal.querySelector('#cancelar-producto').addEventListener('click', () => modal.remove());
+    modal.querySelector('#confirmar-producto').addEventListener('click', () => {
+        const selectP = modal.querySelector('#select-producto');
+        const id_producto = selectP.value;
+        if (!id_producto) { mostrarWarning('Seleccione un producto'); return; }
+        const cantidad = parseInt(modal.querySelector('#cantidad-producto').value);
+        if (isNaN(cantidad) || cantidad < 1) { mostrarWarning('Cantidad válida requerida'); return; }
+        const precio_disenio = Number(modal.querySelector('#precio-disenio-producto').value);
+        if (isNaN(precio_disenio) || precio_disenio < 0) { mostrarWarning('Precio de diseño válido requerido'); return; }
+        const selectedOption = selectP.options[selectP.selectedIndex];
+        const nombre = selectedOption.dataset.nombre;
+        const precio_unitario = Number(selectedOption.dataset.precio || 0);
+        const existente = productosPedido.find(p => String(p.id_producto) === String(id_producto));
+        if (existente) { existente.cantidad += cantidad; existente.precio_disenio += precio_disenio; }
+        else productosPedido.push({ id_producto: parseInt(id_producto), nombre, cantidad, precio_unitario, precio_disenio });
+        renderizarProductos();
+        modal.remove();
+    });
+}
+
+async function crearCotizacion() {
+    const res = await fetch(`${API_BASE}/cotizacion/`, {
+        method: 'POST', headers: getHeaders(),
+        body: JSON.stringify({ precio_envio: getPrecioEnvio(), detalles: productosPedido.map(p => ({ id_producto: parseInt(p.id_producto), cantidad: parseInt(p.cantidad), precio_disenio: Number(p.precio_disenio) })) })
+    });
+    if (!res.ok) throw new Error(await parseErrorResponse(res, 'Error al crear cotización'));
+    return res.json();
+}
+
+async function crearPedido(event) {
+    event.preventDefault();
+    const id_cliente = parseInt(clienteSelect.value);
+    const id_direccion = parseInt(direccionSelect.value);
+    const id_estado = parseInt(estadoSelect.value);
+    const fecha_entrega = document.getElementById('fecha_entrega').value;
+    const comentario = document.getElementById('comentario').value.trim();
+    const tipo_entrega = document.getElementById('tipo_entrega').value === 'true';
+    const subtotal = getSubtotal();
+    const total = subtotal + getPrecioEnvio();
+
+    if (!id_cliente) { mostrarWarning('Seleccione un cliente'); return; }
+    if (!id_direccion) { mostrarWarning('Seleccione una dirección'); return; }
+    if (!id_estado) { mostrarWarning('Seleccione un estado'); return; }
+    if (!fecha_entrega) { mostrarWarning('Seleccione fecha de entrega'); return; }
+    if (productosPedido.length === 0) { mostrarWarning('Agregue al menos un producto al pedido'); return; }
+
+    const btnSubmit = document.getElementById('btn-submit');
+    const originalText = btnSubmit.innerHTML;
+    btnSubmit.innerHTML = '<span class="material-symbols-outlined animate-spin text-lg">progress_activity</span> Creando...';
+    btnSubmit.disabled = true;
+
+    try {
+        const nuevaCotizacion = await crearCotizacion();
+        const datosPedido = { id_direccion, id_estado, id_cliente, id_cotizacion: nuevaCotizacion.id_cotizacion, fecha_entrega: new Date(fecha_entrega).toISOString(), fecha_pedido: new Date().toISOString(), comentario, tipo_entrega, subtotal, total };
+        const resPedido = await fetch(`${API_BASE}/pedidos/`, { method: 'POST', headers: getHeaders(), body: JSON.stringify(datosPedido) });
+        if (!resPedido.ok) throw new Error(await parseErrorResponse(resPedido, 'Error al crear pedido'));
+        const nuevoPedido = await resPedido.json();
+        mostrarExito(`Pedido #${nuevoPedido.id_pedido} creado correctamente.`, () => {
+            window.location.href = 'pedidos.html';
+        });
+    } catch (error) {
+        mostrarError('Error al crear pedido: ' + error.message);
+        btnSubmit.innerHTML = originalText;
+        btnSubmit.disabled = false;
+    }
+}
+
+async function nuevoCliente() {
+    const modal = document.getElementById('modal-cliente');
+    modal.classList.remove('hidden');
+    document.getElementById('guardar-cliente').onclick = async () => {
+        const nombre = document.getElementById('new_nombre').value.trim();
+        const apellido = document.getElementById('new_apellido').value.trim();
+        const telefono = document.getElementById('new_telefono').value.trim();
+        if (!nombre || !apellido) { mostrarWarning('Nombre y apellido son obligatorios'); return; }
+        try {
+            const res = await fetch(`${API_BASE}/cliente/`, { method: 'POST', headers: getHeaders(), body: JSON.stringify({ nombre, apellido, telefono }) });
+            if (!res.ok) throw new Error(await parseErrorResponse(res, 'Error al crear cliente'));
+            const nuevo = await res.json();
+            mostrarExito('Cliente creado correctamente', () => {});
+            await cargarClientes();
+            if (nuevo.id_cliente) clienteSelect.value = nuevo.id_cliente;
+            modal.classList.add('hidden');
+            document.getElementById('new_nombre').value = '';
+            document.getElementById('new_apellido').value = '';
+            document.getElementById('new_telefono').value = '';
+        } catch (e) { mostrarError('Error: ' + e.message); }
+    };
+    document.getElementById('cancelar-modal-cliente').onclick = () => modal.classList.add('hidden');
+}
+
+async function nuevaDireccion() {
+    const idCliente = parseInt(clienteSelect.value);
+    if (!idCliente) { mostrarWarning('Primero seleccione un cliente'); return; }
+    const modal = document.getElementById('modal-direccion');
+    modal.classList.remove('hidden');
+    document.getElementById('guardar-direccion').onclick = async () => {
+        const descripcion = document.getElementById('new_descripcion').value.trim();
+        if (!descripcion) { mostrarWarning('La dirección es obligatoria'); return; }
+        try {
+            const res = await fetch(`${API_BASE}/direccion/`, { method: 'POST', headers: getHeaders(), body: JSON.stringify({ id_cliente: idCliente, descripcion }) });
+            if (!res.ok) throw new Error(await parseErrorResponse(res, 'Error al crear dirección'));
+            const nueva = await res.json();
+            mostrarExito('Dirección agregada correctamente', () => {});
+            await cargarTodasDirecciones();
+            filtrarDireccionesPorCliente(idCliente);
+            if (nueva.id_direccion) direccionSelect.value = nueva.id_direccion;
+            modal.classList.add('hidden');
+            document.getElementById('new_descripcion').value = '';
+        } catch (e) { mostrarError('Error: ' + e.message); }
+    };
+    document.getElementById('cancelar-modal-direccion').onclick = () => modal.classList.add('hidden');
+}
+
+function cargarDatosDesdeCotizacion() {
+    const datosGuardados = sessionStorage.getItem("datos_pedido_desde_cotizacion");
+    if (!datosGuardados) return false;
+    try {
+        const cotizacion = JSON.parse(datosGuardados);
+        mostrarExito(`Cotización #${cotizacion.id_cotizacion_original} cargada para este pedido.`, () => {});
+        const notasTextarea = document.getElementById('comentario');
+        const fechaCotizacion = cotizacion.fecha_cotizacion ? new Date(cotizacion.fecha_cotizacion).toLocaleDateString() : new Date().toLocaleDateString();
+        if (!notasTextarea.value.includes("generado desde cotización")) notasTextarea.value = `[Pedido generado desde cotización #${cotizacion.id_cotizacion_original} - ${fechaCotizacion}]\n\n` + (notasTextarea.value || "");
+        if (cotizacion.envio > 0) { precioEnvioInput.value = cotizacion.envio; actualizarResumen(); }
+        if (productosCatalogo.length === 0) {
+            const checkInterval = setInterval(() => {
+                if (productosCatalogo.length > 0) { clearInterval(checkInterval); procesarProductosCotizacion(cotizacion.productos); }
+            }, 100);
+            setTimeout(() => clearInterval(checkInterval), 5000);
+        } else { procesarProductosCotizacion(cotizacion.productos); }
+        if (cotizacion.cliente_nombre && cotizacion.cliente_nombre !== "Cliente de cotización") {
+            const clienteExacto = clientes.find(c => `${c.nombre} ${c.apellido}`.toLowerCase() === cotizacion.cliente_nombre.toLowerCase());
+            if (clienteExacto) setTimeout(() => { clienteSelect.value = clienteExacto.id_cliente; mostrarExito(`Cliente "${cotizacion.cliente_nombre}" seleccionado automáticamente.`, () => {}); }, 500);
+        }
+        setTimeout(() => { sessionStorage.removeItem("datos_pedido_desde_cotizacion"); }, 5000);
+        return true;
+    } catch (error) { mostrarError("Error al cargar los datos de la cotización"); return false; }
+}
+
+function procesarProductosCotizacion(productosCotizacion) {
+    if (!productosCotizacion || productosCotizacion.length === 0) { mostrarWarning("La cotización no tiene productos"); return; }
+    const nuevosProductos = productosCotizacion.map(prodCot => {
+        const productoCatalogo = productosCatalogo.find(p => p.id_producto === prodCot.id_producto);
+        if (productoCatalogo) return { id_producto: prodCot.id_producto, nombre: productoCatalogo.descripcion || prodCot.nombre || `Producto ${prodCot.id_producto}`, cantidad: parseFloat(prodCot.cantidad), precio_unitario: parseFloat(productoCatalogo.precio_unitario) || parseFloat(prodCot.precio_unitario) || 0, precio_disenio: parseFloat(prodCot.precio_disenio) || 0 };
+        return { id_producto: prodCot.id_producto, nombre: prodCot.nombre || `Producto ${prodCot.id_producto}`, cantidad: parseFloat(prodCot.cantidad), precio_unitario: parseFloat(prodCot.precio_unitario) || 0, precio_disenio: parseFloat(prodCot.precio_disenio) || 0 };
+    });
+    if (nuevosProductos.length > 0) { productosPedido.push(...nuevosProductos); renderizarProductos(); mostrarExito(`Se cargaron ${nuevosProductos.length} producto(s) desde la cotización.`, () => {}); actualizarResumen(); }
+}
+
+clienteSelect.addEventListener('change', async () => {
+    const id = clienteSelect.value;
+    if (id) { await cargarTodasDirecciones(); filtrarDireccionesPorCliente(id); }
+    else { direccionSelect.innerHTML = '<option value="">Primero seleccione un cliente</option>'; direccionSelect.disabled = true; }
+});
+
+precioEnvioInput.addEventListener('input', actualizarResumen);
+document.getElementById('btn-agregar-producto').addEventListener('click', mostrarModalAgregarProducto);
+document.getElementById('btn-nuevo-cliente').addEventListener('click', nuevoCliente);
+document.getElementById('btn-nueva-direccion').addEventListener('click', nuevaDireccion);
+document.getElementById('form-pedido').addEventListener('submit', crearPedido);
+
+async function init() {
+    await Promise.all([cargarClientes(), cargarTodasDirecciones(), cargarEstados(), cargarProductosCatalogo()]);
+    const fechaURL = getParameterByName('fecha');
+    const fechaInput = document.getElementById('fecha_entrega');
+    if (fechaURL && fechaURL.match(/^\d{4}-\d{2}-\d{2}$/)) fechaInput.value = fechaURL;
+    else { const hoy = new Date(); hoy.setDate(hoy.getDate() + 3); fechaInput.value = hoy.toISOString().slice(0, 10); }
+    actualizarResumen();
+    setTimeout(() => { cargarDatosDesdeCotizacion(); }, 500);
+}
+
+init();
+</script>
+</body>
+</html>

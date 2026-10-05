@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html class="light" lang="es">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: { rose: { 500: '#F43F5E' }, brand: { pink: '#FEBDC6', burgundy: '#5D1927' } },
+                fontFamily: { "headline": ["Montserrat"], "body": ["Inter"] },
+            },
+        },
+    }
+</script>
+<style>
+    .paper-shadow { box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
+    @media print { .no-print { display: none; } body { background: white; } .paper-container { box-shadow: none; } }
+</style>
+</head>
+<body class="bg-[#FEBDC6] font-body min-h-screen flex flex-col items-center">
+<main class="pt-12 pb-32 px-4 w-full flex flex-col items-center">
+    <div class="w-full max-w-[210mm] mb-6 flex justify-between items-center no-print">
+        <div class="flex items-center gap-2 text-brand-burgundy"><span class="material-symbols-outlined">description</span><span id="folio-cotizacion" class="font-headline">Cotización #---</span></div>
+        <div class="flex gap-4">
+            <button id="btn-descargar-pdf" class="flex items-center gap-2 bg-brand-burgundy text-white px-6 py-2.5 rounded-xl">Descargar PDF</button>
+            <button class="flex items-center gap-2 bg-brand-burgundy text-white px-6 py-2.5 rounded-xl" onclick="window.print()">Imprimir</button>
+            <a href="cotizaciones.html" class="flex items-center gap-2 bg-brand-burgundy text-white px-6 py-2.5 rounded-xl">Volver</a>
+        </div>
+    </div>
+    <div id="pdf-content" class="paper-container bg-white w-full max-w-[210mm] min-h-[297mm] paper-shadow p-12 flex flex-col">
+        <div class="flex justify-between items-start mb-12">
+            <div><div class="flex items-center gap-3"><div class="w-12 h-12 bg-rose-100 rounded-full flex items-center justify-center"><span class="material-symbols-outlined text-rose-500 text-3xl">cake</span></div><h1 class="text-3xl font-extrabold font-headline text-brand-burgundy">Nonna</h1></div><div class="text-xs text-zinc-500 uppercase mt-1">Pastelería Boutique &amp; Gourmet</div></div>
+            <div class="text-right"><h2 class="text-2xl font-bold font-headline text-brand-burgundy mb-1">COTIZACIÓN</h2><p id="fecha-cotizacion" class="text-zinc-500 text-sm">Fecha: --</p><p id="folio-detalle" class="text-zinc-500 text-sm font-mono">Folio: #---</p></div>
+        </div>
+        <div class="grid grid-cols-2 gap-12 mb-12">
+            <div><h3 class="text-xs font-bold text-rose-500 uppercase tracking-wider mb-3">De:</h3><p class="font-bold text-zinc-800">Pastelería Nonna S.A. de C.V.</p><p class="text-sm text-zinc-600">Calle de las Rosas #452<br/>Colonia Del Valle, CP 03100<br/>Ciudad de México</p></div>
+            <div><h3 class="text-xs font-bold text-rose-500 uppercase tracking-wider mb-3">Para:</h3><p id="cliente-nombre" class="font-bold text-zinc-800">Cargando...</p><p id="cliente-info" class="text-sm text-zinc-600"></p></div>
+        </div>
+        <div class="flex-grow"><table class="w-full text-left border-collapse"><thead><tr class="border-b-2 border-brand-burgundy"><th class="py-4 text-xs font-bold text-brand-burgundy uppercase">Concepto</th><th class="py-4 text-xs font-bold text-brand-burgundy uppercase text-right">Precio</th></tr></thead><tbody id="tabla-productos-preview"></tbody></table></div>
+        <div class="mt-12 border-t border-zinc-100 pt-8 flex justify-end"><div class="w-64 space-y-3"><div class="flex justify-between text-zinc-600"><span>Subtotal</span><span id="subtotal">$0.00</span></div><div class="flex justify-between text-zinc-600 pb-3 border-b border-rose-100"><span>IVA (16%)</span><span id="iva">$0.00</span></div><div class="flex justify-between items-center pt-2"><span class="text-lg font-bold text-brand-burgundy">Total Final</span><span id="total" class="text-2xl font-black text-brand-burgundy">$0.00</span></div></div></div>
+        <div class="mt-16 pt-8 border-t border-rose-50"><h4 class="text-xs font-bold text-zinc-400 uppercase mb-2">Notas y Condiciones:</h4><p class="text-[10px] text-zinc-400 italic">* Vigencia 15 días.<br/>* Anticipo 50%.<br/>* Precios incluyen IVA.</p></div>
+    </div>
+</main>
+
+<script>
+    function obtenerCotizaciones() { return JSON.parse(localStorage.getItem('cotizaciones') || '[]'); }
+    function obtenerClientesMap() {
+        // Simular o usar API
+        return { 1: 'Cliente Ejemplo 1', 2: 'Cliente Ejemplo 2' };
+    }
+    const urlParams = new URLSearchParams(window.location.search);
+    const cotizacionId = parseInt(urlParams.get('id'));
+    if (!cotizacionId) { alert('No se especificó cotización'); window.location.href = 'cotizaciones.html'; }
+
+    function cargarVistaPrevia() {
+        const cotizaciones = obtenerCotizaciones();
+        const cot = cotizaciones.find(c => c.id_cotizacion === cotizacionId);
+        if (!cot) { alert('Cotización no encontrada'); return; }
+        document.getElementById('folio-cotizacion').innerText = `Cotización #${cot.id_cotizacion}`;
+        document.getElementById('folio-detalle').innerText = `Folio: #COT-${cot.id_cotizacion}`;
+        document.getElementById('fecha-cotizacion').innerText = `Fecha: ${new Date(cot.fecha).toLocaleDateString()}`;
+        // Cliente (simulado o real)
+        const clientesMap = obtenerClientesMap();
+        document.getElementById('cliente-nombre').innerText = clientesMap[cot.id_cliente] || `Cliente ${cot.id_cliente}`;
+        document.getElementById('cliente-info').innerHTML = 'Teléfono: 55 1234 5678<br/>cliente@email.com';
+        // Productos
+        let subtotal = 0;
+        const tbody = document.getElementById('tabla-productos-preview');
+        tbody.innerHTML = '';
+        (cot.productos || []).forEach(prod => {
+            const subtotalProd = prod.cantidad * prod.precio_unitario;
+            subtotal += subtotalProd;
+            const fila = `<tr><td class="py-6 pr-8"><div class="font-bold text-zinc-800">Producto ID ${prod.id_producto}</div><div class="text-xs text-zinc-500">Cantidad: ${prod.cantidad}</div></td><td class="py-6 text-right font-semibold text-zinc-800">$${subtotalProd.toFixed(2)}</td></tr>`;
+            tbody.insertAdjacentHTML('beforeend', fila);
+        });
+        const iva = subtotal * 0.16;
+        const total = subtotal + iva;
+        document.getElementById('subtotal').innerText = `$${subtotal.toFixed(2)}`;
+        document.getElementById('iva').innerText = `$${iva.toFixed(2)}`;
+        document.getElementById('total').innerText = `$${total.toFixed(2)}`;
+    }
+
+    document.getElementById('btn-descargar-pdf').addEventListener('click', () => {
+        const element = document.getElementById('pdf-content');
+        html2pdf().set({ margin: [0.5,0.5,0.5,0.5], filename: `Cotizacion_${cotizacionId}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' } }).from(element).save();
+    });
+    cargarVistaPrevia();
+</script>
+</body>
+</html>

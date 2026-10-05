@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Compra - Nonna</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#5d1927",
+                        "brand-pink": "#FEBDC6",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#1f1316",
+                    },
+                    fontFamily: { "display": ["Montserrat", "sans-serif"] },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        body { background-color: #FEBDC6; font-family: 'Montserrat', sans-serif; }
+        .modal-mensaje { transition: opacity 0.3s ease, visibility 0.3s ease; }
+        #diagnostico {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: #333;
+            color: #0f0;
+            font-family: monospace;
+            font-size: 10px;
+            padding: 5px;
+            border-radius: 5px;
+            z-index: 9999;
+            max-width: 300px;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 flex items-center justify-center">
+    <div id="diagnostico">🔄 Diagnóstico en curso...</div>
+    
+    <div class="w-full max-w-4xl bg-white rounded-2xl shadow-xl overflow-hidden">
+        <div class="p-6 border-b border-primary/10 flex justify-between items-center">
+            <div>
+                <h1 class="text-2xl font-bold text-primary">Editar Compra</h1>
+                <p class="text-slate-500 text-sm">Modifica la compra (proveedor, fecha, productos)</p>
+            </div>
+            <a href="compras.html" class="text-primary hover:bg-primary/10 p-2 rounded-full transition">
+                <span class="material-symbols-outlined">close</span>
+            </a>
+        </div>
+        <div class="p-6">
+            <form id="form-compra" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-bold text-primary mb-1">ID Compra</label>
+                    <input id="id_compra" type="text" class="w-full p-3 bg-slate-100 border border-primary/20 rounded-xl text-slate-500" readonly>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-primary mb-1">Proveedor *</label>
+                    <select id="id_proveedor" class="w-full p-3 border border-primary/20 rounded-xl focus:ring-primary" required>
+                        <option value="">Cargando proveedores...</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-primary mb-1">Fecha de compra *</label>
+                    <input type="datetime-local" id="fecha" class="w-full p-3 border border-primary/20 rounded-xl focus:ring-primary" required>
+                </div>
+                <div>
+                    <div class="flex justify-between items-center mb-3">
+                        <label class="block text-sm font-bold text-primary">Productos / Materias primas</label>
+                        <button type="button" id="btn-agregar-producto" class="text-sm bg-primary/10 text-primary px-3 py-1 rounded-full font-semibold flex items-center gap-1">
+                            <span class="material-symbols-outlined text-base">add</span> Agregar producto
+                        </button>
+                    </div>
+                    <div id="productos-container" class="space-y-3">
+                        <div class="text-center text-slate-400 py-4">Cargando productos...</div>
+                    </div>
+                </div>
+                <div class="flex gap-4 pt-4">
+                    <button type="submit" id="btn-submit" class="flex-1 bg-primary text-white font-bold py-3 rounded-xl hover:bg-primary/90 transition flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined">save</span>
+                        Actualizar Compra
+                    </button>
+                    <a href="compras.html" class="flex-1 border-2 border-primary text-primary font-bold py-3 rounded-xl hover:bg-primary/5 text-center">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modales -->
+    <div id="modal-agregar-producto" class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-md">
+            <h3 class="text-xl font-bold mb-4">Agregar producto</h3>
+            <div class="space-y-4">
+                <select id="select-materia" class="w-full p-3 border rounded-xl">
+                    <option value="">Seleccione materia prima</option>
+                </select>
+                <input type="number" id="cantidad-producto" class="w-full p-3 border rounded-xl" placeholder="Cantidad" min="0.01" step="0.01" value="1">
+                <div class="flex gap-3 justify-end">
+                    <button id="cancelar-producto" class="px-4 py-2 border rounded-xl">Cancelar</button>
+                    <button id="confirmar-producto" class="px-4 py-2 bg-primary text-white rounded-xl">Agregar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-exito" class="fixed inset-0 flex items-center justify-center z-50 hidden modal-mensaje">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+        <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 text-center shadow-2xl">
+            <span class="material-symbols-outlined text-green-600 text-5xl mb-2">check_circle</span>
+            <h3 class="text-xl font-bold text-slate-900">¡Compra actualizada!</h3>
+            <p class="text-slate-500 mt-2">Los cambios se han guardado correctamente.</p>
+            <button id="btn-cerrar-exito" class="mt-6 w-full bg-primary text-white py-2 rounded-xl font-bold">Continuar</button>
+        </div>
+    </div>
+    <div id="modal-error" class="fixed inset-0 flex items-center justify-center z-50 hidden modal-mensaje">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+        <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 text-center shadow-2xl">
+            <span class="material-symbols-outlined text-red-600 text-5xl mb-2">error</span>
+            <h3 class="text-xl font-bold text-slate-900">Error</h3>
+            <p id="error-mensaje" class="text-slate-500 mt-2"></p>
+            <button id="btn-cerrar-error" class="mt-6 w-full bg-primary text-white py-2 rounded-xl font-bold">Aceptar</button>
+        </div>
+    </div>
+
+    <script>
+        // ===== CONFIGURACIÓN - CAMBIA ESTO SEGÚN TU BACKEND =====
+        // Opción 1: Si el servidor está en tu computadora local
+        // const API_BASE = 'http://localhost:8000/api';
+        
+        // Opción 2: Si usas una IP específica (la actual)
+        const API_BASE = 'http://127.0.0.1:8000/api';
+        
+        // Opción 3: Si usas ngrok o tunnel
+        // const API_BASE = 'https://tun-tunnel.ngrok.io/api';
+        // =======================================================
+        
+        const TOKEN = localStorage.token;
+        
+        // Diagnóstico
+        const diagDiv = document.getElementById('diagnostico');
+        function actualizarDiagnostico(texto, esError = false) {
+            diagDiv.innerHTML = texto;
+            diagDiv.style.backgroundColor = esError ? '#600' : '#333';
+            diagDiv.style.color = esError ? '#f00' : '#0f0';
+            console.log('[DIAG]', texto);
+        }
+        
+        if (!TOKEN) {
+            actualizarDiagnostico('❌ No hay token! Redirigiendo...', true);
+            alert('No hay sesión activa. Redirigiendo...');
+            window.location.href = '/index.html';
+        }
+
+        function getHeaders() {
+            return {
+                'accept': 'application/json',
+                'Authorization': `Bearer ${TOKEN}`,
+                'Content-Type': 'application/json'
+            };
+        }
+
+        // Función mejorada para fetch con timeout y diagnóstico
+        async function fetchAPI(url, options = {}) {
+            actualizarDiagnostico(`🔄 Conectando a: ${url.substring(0, 50)}...`);
+            
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => {
+                controller.abort();
+                actualizarDiagnostico('⏰ Timeout! El servidor no responde', true);
+            }, 10000);
+            
+            try {
+                const response = await fetch(url, {
+                    ...options,
+                    signal: controller.signal,
+                    headers: getHeaders()
+                });
+                clearTimeout(timeoutId);
+                actualizarDiagnostico(`✅ ${response.status} ${response.statusText}`);
+                return response;
+            } catch (error) {
+                clearTimeout(timeoutId);
+                actualizarDiagnostico(`❌ Error: ${error.message}`, true);
+                
+                if (error.name === 'AbortError') {
+                    throw new Error('El servidor no responde. Verifica que esté corriendo en: ' + API_BASE);
+                }
+                if (error.message.includes('Failed to fetch')) {
+                    throw new Error(`No se puede conectar a ${API_BASE}. Verifica:
+1. El servidor backend está corriendo
+2. La IP/URL es correcta
+3. No hay bloqueo de CORS
+4. El puerto 8000 está abierto`);
+                }
+                throw error;
+            }
+        }
+
+        // Probar conexión al cargar
+        async function probarConexion() {
+            try {
+                actualizarDiagnostico('🔍 Probando conexión al servidor...');
+                const res = await fetch(`${API_BASE}/compra/`, { method: 'HEAD', headers: getHeaders() });
+                actualizarDiagnostico(`✅ Servidor accesible! (${res.status})`);
+                return true;
+            } catch (error) {
+                actualizarDiagnostico(`❌ Servidor NO accesible: ${error.message}`, true);
+                mostrarError(`No se puede conectar al servidor. Asegúrate de que el backend esté corriendo en:\n${API_BASE}\n\nError: ${error.message}`);
+                return false;
+            }
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const compraId = urlParams.get('id');
+        if (!compraId) {
+            mostrarError('No se especificó la compra a editar', true);
+        }
+
+        let proveedores = [];
+        let materiasPrimas = [];
+        let unidadesMap = {};
+        let detalles = [];
+
+        const proveedorSelect = document.getElementById('id_proveedor');
+        const fechaInput = document.getElementById('fecha');
+        const container = document.getElementById('productos-container');
+        const modalAgregar = document.getElementById('modal-agregar-producto');
+
+        function mostrarExito(callback) {
+            const modal = document.getElementById('modal-exito');
+            modal.classList.remove('hidden');
+            document.getElementById('btn-cerrar-exito').onclick = () => {
+                modal.classList.add('hidden');
+                if (callback) callback();
+            };
+        }
+
+        function mostrarError(mensaje, redirigir = false) {
+            const modal = document.getElementById('modal-error');
+            document.getElementById('error-mensaje').innerText = mensaje;
+            modal.classList.remove('hidden');
+            document.getElementById('btn-cerrar-error').onclick = () => {
+                modal.classList.add('hidden');
+                if (redirigir) window.location.href = 'compras.html';
+            };
+        }
+
+        async function cargarUnidades() {
+            try {
+                const res = await fetchAPI(`${API_BASE}/unidad_medida/`);
+                if (res.ok) {
+                    const unidades = await res.json();
+                    unidadesMap = {};
+                    unidades.forEach(u => {
+                        unidadesMap[u.id_unidad] = u.abreviatura || `Unidad ${u.id_unidad}`;
+                    });
+                }
+            } catch(e) { 
+                console.error('Error cargando unidades', e);
+            }
+        }
+
+        async function cargarProveedores() {
+            try {
+                const res = await fetchAPI(`${API_BASE}/proveedor/`);
+                if (!res.ok) throw new Error(`Error ${res.status}`);
+                proveedores = await res.json();
+                proveedorSelect.innerHTML = '<option value="">Seleccione un proveedor</option>';
+                proveedores.forEach(p => {
+                    const opt = document.createElement('option');
+                    opt.value = p.id_proveedor;
+                    opt.textContent = p.descripcion || `Proveedor ${p.id_proveedor}`;
+                    proveedorSelect.appendChild(opt);
+                });
+            } catch(e) {
+                proveedorSelect.innerHTML = '<option value="">Error al cargar proveedores</option>';
+                mostrarError('No se pudieron cargar los proveedores: ' + e.message);
+            }
+        }
+
+        async function cargarMaterias() {
+            try {
+                const res = await fetchAPI(`${API_BASE}/materia_prima/`);
+                if (!res.ok) throw new Error();
+                materiasPrimas = await res.json();
+            } catch(e) {
+                mostrarError('No se pudieron cargar las materias primas');
+            }
+        }
+
+        async function cargarCompra() {
+            try {
+                const res = await fetchAPI(`${API_BASE}/compra/${compraId}`);
+                if (!res.ok) throw new Error(`Error ${res.status}`);
+                const compra = await res.json();
+                document.getElementById('id_compra').value = compra.id_compra;
+                proveedorSelect.value = compra.id_proveedor;
+                if (compra.fecha) {
+                    const fecha = new Date(compra.fecha);
+                    const year = fecha.getFullYear();
+                    const month = String(fecha.getMonth() + 1).padStart(2, '0');
+                    const day = String(fecha.getDate()).padStart(2, '0');
+                    const hours = String(fecha.getHours()).padStart(2, '0');
+                    const minutes = String(fecha.getMinutes()).padStart(2, '0');
+                    fechaInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+                }
+            } catch (error) {
+                mostrarError('Error al cargar la compra: ' + error.message, true);
+                throw error;
+            }
+        }
+
+        async function cargarDetalles() {
+            try {
+                const res = await fetchAPI(`${API_BASE}/compra/${compraId}`);
+                if (!res.ok) throw new Error();
+                const compraData = await res.json();
+                
+                if (compraData.detalle && Array.isArray(compraData.detalle)) {
+                    detalles = compraData.detalle.map(d => {
+                        const materia = materiasPrimas.find(m => m.id_materia === d.id_materia);
+                        return {
+                            id_materia: d.id_materia,
+                            cantidad: d.cantidad,
+                            nombre: materia ? materia.descripcion : `ID ${d.id_materia}`,
+                            unidad: materia ? (unidadesMap[materia.id_unidad] || '') : ''
+                        };
+                    });
+                } else {
+                    detalles = [];
+                }
+                renderizarProductos();
+            } catch (error) {
+                console.warn('No se pudieron cargar los detalles.', error);
+                detalles = [];
+                renderizarProductos();
+            }
+        }
+
+        function renderizarProductos() {
+            if (detalles.length === 0) {
+                container.innerHTML = '<div class="text-center text-slate-400 py-4">No hay productos agregados. Haz clic en "Agregar producto".</div>';
+                return;
+            }
+            container.innerHTML = '';
+            detalles.forEach((det, idx) => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center gap-3 p-3 bg-slate-50 rounded-xl';
+                div.innerHTML = `
+                    <div class="flex-1">
+                        <span class="font-bold">${escapeHtml(det.nombre)}</span>
+                        <div class="flex items-center gap-2 mt-1">
+                            <span class="text-xs text-slate-500">Cantidad:</span>
+                            <input type="number" class="input-cantidad border rounded px-2 py-1 w-24" value="${det.cantidad}" data-idx="${idx}" step="0.01" min="0">
+                            <span class="text-xs text-slate-500">${det.unidad}</span>
+                        </div>
+                    </div>
+                    <button type="button" class="text-red-500 hover:bg-red-50 p-1 rounded-full eliminar-producto" data-idx="${idx}">
+                        <span class="material-symbols-outlined">delete</span>
+                    </button>
+                `;
+                container.appendChild(div);
+            });
+            
+            document.querySelectorAll('.input-cantidad').forEach(input => {
+                input.addEventListener('change', (e) => {
+                    const idx = parseInt(input.dataset.idx);
+                    let newVal = parseFloat(input.value);
+                    if (isNaN(newVal) || newVal < 0) newVal = 0;
+                    detalles[idx].cantidad = newVal;
+                });
+            });
+            
+            document.querySelectorAll('.eliminar-producto').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const idx = parseInt(btn.dataset.idx);
+                    detalles.splice(idx, 1);
+                    renderizarProductos();
+                });
+            });
+        }
+
+        function mostrarModalAgregarProducto() {
+            if (materiasPrimas.length === 0) {
+                mostrarError('No hay materias primas registradas.');
+                return;
+            }
+            
+            const select = document.getElementById('select-materia');
+            select.innerHTML = '<option value="">Seleccione materia prima</option>';
+            materiasPrimas.forEach(mp => {
+                const option = document.createElement('option');
+                option.value = mp.id_materia;
+                option.setAttribute('data-unidad', unidadesMap[mp.id_unidad] || '');
+                option.setAttribute('data-nombre', mp.descripcion);
+                option.textContent = `${mp.descripcion} (${unidadesMap[mp.id_unidad] || 'unidad'})`;
+                select.appendChild(option);
+            });
+            
+            document.getElementById('cantidad-producto').value = '1';
+            modalAgregar.classList.remove('hidden');
+        }
+
+        document.getElementById('cancelar-producto').onclick = () => {
+            modalAgregar.classList.add('hidden');
+        };
+
+        document.getElementById('confirmar-producto').onclick = () => {
+            const select = document.getElementById('select-materia');
+            const id_materia = parseInt(select.value);
+            if (!id_materia) { mostrarError('Seleccione una materia prima'); return; }
+            const cantidad = parseFloat(document.getElementById('cantidad-producto').value);
+            if (isNaN(cantidad) || cantidad <= 0) { mostrarError('Cantidad inválida'); return; }
+            const selectedOption = select.options[select.selectedIndex];
+            const nombre = selectedOption.getAttribute('data-nombre');
+            const unidad = selectedOption.getAttribute('data-unidad');
+            
+            const existente = detalles.find(d => d.id_materia === id_materia);
+            if (existente) {
+                existente.cantidad += cantidad;
+            } else {
+                detalles.push({ id_materia, cantidad, nombre, unidad });
+            }
+            renderizarProductos();
+            modalAgregar.classList.add('hidden');
+        };
+
+        async function actualizarCompra(datos) {
+            actualizarDiagnostico(`📤 Enviando PUT a compra/${compraId}...`);
+            const res = await fetchAPI(`${API_BASE}/compra/${compraId}`, {
+                method: 'PUT',
+                body: JSON.stringify(datos)
+            });
+            if (!res.ok) {
+                let errorMsg = '';
+                try {
+                    const err = await res.json();
+                    errorMsg = err.detail || JSON.stringify(err);
+                } catch(e) {
+                    errorMsg = `Error ${res.status}: ${res.statusText}`;
+                }
+                throw new Error(errorMsg);
+            }
+            actualizarDiagnostico(`✅ PUT exitoso!`);
+            return res.json();
+        }
+
+        document.getElementById('form-compra').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id_proveedor = parseInt(proveedorSelect.value);
+            if (!id_proveedor) {
+                mostrarError('Seleccione un proveedor');
+                return;
+            }
+            let fecha = fechaInput.value;
+            if (!fecha) {
+                mostrarError('Ingrese la fecha de compra');
+                return;
+            }
+            fecha = new Date(fecha).toISOString();
+            if (detalles.length === 0) {
+                mostrarError('Debe tener al menos un producto');
+                return;
+            }
+            
+            const detalle = detalles.map(d => ({
+                id_materia: d.id_materia,
+                cantidad: d.cantidad
+            }));
+            
+            const payload = { id_proveedor, fecha, detalle };
+            console.log('Enviando payload:', payload);
+
+            const btn = document.getElementById('btn-submit');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span class="material-symbols-outlined animate-spin">progress_activity</span> Actualizando...';
+            btn.disabled = true;
+
+            try {
+                await actualizarCompra(payload);
+                mostrarExito(() => {
+                    window.location.href = 'compras.html';
+                });
+            } catch (error) {
+                mostrarError('Error al actualizar: ' + error.message);
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        });
+
+        document.getElementById('btn-agregar-producto').addEventListener('click', mostrarModalAgregarProducto);
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : (m === '<' ? '&lt;' : '&gt;'));
+        }
+
+        async function init() {
+            // Primero probar conexión
+            const conectado = await probarConexion();
+            if (!conectado) {
+                mostrarError(`No se puede conectar al servidor en ${API_BASE}. Verifica que el backend esté corriendo.`);
+                return;
+            }
+            
+            await cargarUnidades();
+            await Promise.all([cargarProveedores(), cargarMaterias()]);
+            await cargarCompra();
+            await cargarDetalles();
+        }
+        init();
+    </script>
+</body>
+</html>

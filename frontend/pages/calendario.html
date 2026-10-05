@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#FEBDC6",
+                        "background-light": "#f8f5f6",
+                        "background-dark": "#230f12",
+                        "order-green": "#86efac",
+                        "order-orange": "#fdba74",
+                        "order-red": "#fca5a5",
+                        "order-blue": "#93c5fd",
+                        "order-purple": "#c4b5fd",
+                        "order-yellow": "#FFFF00"
+                    },
+                    fontFamily: {
+                        "display": ["Montserrat", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+</script>
+<style>
+    /* Silenciar advertencias de Tailwind CSS en consola */
+    .tailwind-config-warning {
+        display: none !important;
+    }
+    
+    .group:hover .opacity-0 {
+        opacity: 1 !important;
+    }
+    .overflow-y-auto::-webkit-scrollbar {
+        width: 3px;
+    }
+    .overflow-y-auto::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+    .overflow-y-auto::-webkit-scrollbar-thumb {
+        background: #FEBDC6;
+        border-radius: 10px;
+    }
+    /* Estilo para skeleton loading */
+    .skeleton {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: loading 1.5s infinite;
+    }
+    @keyframes loading {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+</style>
+</head>
+<body class="font-display text-slate-900 dark:text-slate-100 min-h-screen bg-[#FEBDC6]">
+<div class="layout-container flex h-full grow flex-col">
+
+<!-- Top Navigation Bar Begins-->
+<header class="w-full bg-[#f3dfe0] dark:bg-slate-900 border-b border-[#5d1927]/10 px-6 py-4 flex items-center justify-between sticky top-0 z-50">
+    <div class="flex items-center gap-6">
+        <div class="flex items-center gap-3">
+            <div class="bg-[#5d1927] p-2 rounded-lg text-white">
+                <span class="material-symbols-outlined block text-2xl">bakery_dining</span>
+            </div>
+            <h1 class="text-[#5d1927] text-xl font-bold tracking-tight">Nonna</h1>
+        </div>
+        <div class="h-8 w-[1px] bg-[#5d1927]/20"></div>
+        <a href="menu.html" class="flex items-center gap-2 text-[#5d1927] hover:bg-[#5d1927]/10 px-4 py-2 rounded-lg transition-colors duration-200">
+            <span class="material-symbols-outlined">home</span>
+            <span class="text-sm font-bold leading-normal">Menú Principal</span>
+        </a>
+    </div>
+    <div class="flex items-center gap-4">
+        <div class="flex items-center gap-3 pl-4 border-l border-slate-200 dark:border-slate-700">
+            <div class="text-right hidden sm:block">
+                <p id="textoUsuario" class="text-sm font-semibold text-slate-900 dark:text-slate-100">Nombre de usuario</p>
+                <p id="textoRol" class="text-xs text-slate-500">Rol</p>
+            </div>
+        </div>
+        <!-- Bot�n de Cerrar Sesi�n -->
+        <button id="botonCerrarSesion" class="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all duration-300 shadow-md hover:shadow-lg">
+            <span class="material-symbols-outlined text-xl">logout</span>
+            <span class="hidden sm:inline text-sm font-medium">Cerrar Sesión</span>
+        </button>
+    </div>
+</header>
+<script>
+    document.getElementById("textoUsuario").innerText =
+        localStorage.getItem("usuario") || "Invitado";
+    document.getElementById("textoRol").innerText =
+        localStorage.getItem("rol") || "Sin rol";
+
+    const botonCerrarSesion = document.getElementById("botonCerrarSesion");
+    botonCerrarSesion.addEventListener("click", function () {
+        localStorage.clear();
+        window.location.href = "/index.html";
+    });
+</script>
+<!-- Top Navigation Bar Ends-->
+
+<main class="flex-1 px-6 py-8 lg:px-20 max-w-[1440px] mx-auto w-full">
+    <!-- Calendar Header -->
+    <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+        <div class="flex flex-col gap-1">
+            <h1 class="text-primary text-5xl font-black tracking-tighter uppercase leading-none">CALENDARIO</h1>
+            <div class="flex items-center gap-3">
+                <p id="tituloMes" class="text-slate-500 dark:text-slate-400 text-lg font-medium">Cargando mes...</p>
+                <div class="flex gap-1">
+                    <button id="btnMesAnterior" class="p-1 hover:bg-primary/10 rounded transition-colors">
+                        <span class="material-symbols-outlined text-slate-400">←</span>
+                    </button>
+                    <button id="btnMesSiguiente" class="p-1 hover:bg-primary/10 rounded transition-colors">
+                        <span class="material-symbols-outlined text-slate-400">→</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="flex gap-4">
+            <div class="flex flex-wrap items-center gap-3 bg-white dark:bg-slate-800 p-2 px-4 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm">
+                <div class="flex items-center gap-2">
+                    <span class="size-3 rounded-full bg-order-red"></span>
+                    <span class="text-xs font-semibold text-slate-600 dark:text-slate-300">Pendiente </span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="size-3 rounded-full bg-order-orange"></span>
+                    <span class="text-xs font-semibold text-slate-600 dark:text-slate-300">Preparación</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="size-3 rounded-full bg-order-blue"></span>
+                    <span class="text-xs font-semibold text-slate-600 dark:text-slate-300">En camino </span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="size-3 rounded-full bg-order-green"></span>
+                    <span class="text-xs font-semibold text-slate-600 dark:text-slate-300">Entregado </span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="size-3 rounded-full bg-order-purple"></span>
+                    <span class="text-xs font-semibold text-slate-600 dark:text-slate-300">Cancelado </span>
+                </div>
+                 <div class="flex items-center gap-2">
+                    <span class="size-3 rounded-full bg-order-yellow"></span>
+                    <span class="text-xs font-semibold text-slate-600 dark:text-slate-300">En proceso </span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Calendar Grid -->
+    <div class="bg-white dark:bg-slate-900 rounded-3xl overflow-hidden border border-slate-100 dark:border-slate-800 shadow-xl shadow-primary/5">
+        <div class="grid grid-cols-7 border-b border-slate-100 dark:border-slate-800 bg-primary/5">
+            <div class="py-4 text-center text-xs font-black text-slate-400 uppercase tracking-widest">Dom</div>
+            <div class="py-4 text-center text-xs font-black text-slate-400 uppercase tracking-widest">Lun</div>
+            <div class="py-4 text-center text-xs font-black text-slate-400 uppercase tracking-widest">Mar</div>
+            <div class="py-4 text-center text-xs font-black text-slate-400 uppercase tracking-widest">Mié</div>
+            <div class="py-4 text-center text-xs font-black text-slate-400 uppercase tracking-widest">Jue</div>
+            <div class="py-4 text-center text-xs font-black text-slate-400 uppercase tracking-widest">Vie</div>
+            <div class="py-4 text-center text-xs font-black text-slate-400 uppercase tracking-widest">Sáb</div>
+        </div>
+        <div id="calendarioDias" class="grid grid-cols-7 auto-rows-[140px]">
+            <!-- Loading skeleton -->
+            <div class="skeleton" style="grid-column: span 7; height: 140px;"></div>
+        </div>
+    </div>
+</main>
+
+</div>
+
+<script>
+// ============================================
+// SILENCIAR ADVERTENCIAS DE TAILWIND (AL INICIO)
+// ============================================
+(function() {
+    // Guardar funciones originales
+    const originalWarn = console.warn;
+    const originalError = console.error;
+    
+    // Filtrar advertencias de Tailwind
+    console.warn = function(...args) {
+        const message = args[0] || '';
+        if (typeof message === 'string') {
+            // Ignorar advertencias específicas de Tailwind
+            if (message.includes('cdn.tailwindcss.com') || 
+                message.includes('Tailwind CSS') ||
+                message.includes('plugins=forms') ||
+                message.includes('production') ||
+                message.includes('should not be used in production')) {
+                return; // No mostrar estas advertencias
+            }
+        }
+        originalWarn.apply(console, args);
+    };
+    
+    console.error = function(...args) {
+        const message = args[0] || '';
+        if (typeof message === 'string') {
+            if (message.includes('Tailwind') || message.includes('tailwind')) {
+                return; // No mostrar errores de Tailwind
+            }
+        }
+        originalError.apply(console, args);
+    };
+})();
+
+// ============================================
+// NONNA - CALENDARIO CON API REAL (VERSIÓN CORREGIDA)
+// ============================================
+
+// ============================================
+// 1. CONFIGURACIÓN DE API
+// ============================================
+
+const API_BASE = 'http://127.0.0.1:8000/api';
+let TOKEN = localStorage.getItem('token') || localStorage.getItem('Token');
+
+function getHeaders() {
+    return {
+        'accept': 'application/json',
+        'Authorization': `Bearer ${TOKEN}`,
+        'Content-Type': 'application/json'
+    };
+}
+
+// ============================================
+// 2. MAPEOS DE ESTADOS (CORREGIDO)
+// ============================================
+
+// Mapeo de estado API a colores y textos
+const estadoConfig = {
+    2: { nombre: 'Pendiente', color: 'bg-order-red', local: 'Pendiente' },
+    8: { nombre: 'Preparación', color: 'bg-order-orange', local: 'En preparacion' },
+    7: { nombre: 'En camino', color: 'bg-order-blue', local: 'En camino' },
+    5: { nombre: 'Entregado', color: 'bg-order-green', local: 'Entregado' },
+    6: { nombre: 'Cancelado', color: 'bg-order-purple', local: 'Cancelado' },
+    3: { nombre: 'En proceso', color: 'bg-order-yellow', local: 'En proceso' },
+
+};
+
+// Mapeo para actualizar estado vía API
+const estadoMapLocalToAPI = {
+    'Pendiente': 2,
+    'En preparacion': 8,
+    'En camino': 7,
+    'Entregado': 5,
+    'Cancelado': 6,
+    'En proceso': 3
+};
+
+let clientesMap = {};
+let pedidosCache = [];
+let clientesCargados = false;
+
+// ============================================
+// 3. FUNCIONES DE API
+// ============================================
+
+function verificarToken() {
+    if (!TOKEN) {
+        alert('❌ Sesión no iniciada. Redirigiendo al login...');
+        window.location.href = '/index.html';
+        return false;
+    }
+    return true;
+}
+
+async function cargarClientes() {
+    if (clientesCargados) return;
+    
+    try {
+        const response = await fetch(`${API_BASE}/cliente/`, { headers: getHeaders() });
+        if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+        
+        const clientes = await response.json();
+        clientesMap = {};
+        clientes.forEach(cliente => {
+            const nombreCompleto = `${cliente.nombre || ''} ${cliente.apellido || ''}`.trim();
+            clientesMap[cliente.id_cliente] = nombreCompleto || `Cliente ${cliente.id_cliente}`;
+        });
+        clientesCargados = true;
+        console.log(`✅ Cargados ${Object.keys(clientesMap).length} clientes`);
+    } catch (error) {
+        console.error('❌ Error cargando clientes:', error);
+    }
+}
+
+async function cargarPedidosDesdeAPI() {
+    if (!verificarToken()) return [];
+    
+    try {
+        const response = await fetch(`${API_BASE}/pedidos/`, { headers: getHeaders() });
+        if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+        
+        const pedidos = await response.json();
+        pedidosCache = pedidos;
+        console.log(`✅ Cargados ${pedidos.length} pedidos desde API`);
+        
+        // Mostrar estados de los pedidos para depuración
+        pedidos.forEach(p => {
+            console.log(`Pedido #${p.id_pedido}: Estado ID=${p.id_estado} - ${estadoConfig[p.id_estado]?.nombre || 'Desconocido'}`);
+        });
+        
+        return pedidos;
+    } catch (error) {
+        console.error('❌ Error cargando pedidos:', error);
+        const contenedor = document.getElementById('calendarioDias');
+        if (contenedor) {
+            contenedor.innerHTML = `
+                <div class="col-span-7 text-center py-20">
+                    <span class="material-symbols-outlined text-6xl text-red-400">error</span>
+                    <p class="mt-4 text-red-500 font-semibold">Error de conexión con el servidor</p>
+                    <p class="text-sm text-slate-400 mt-2">Verifica tu conexión o token de autenticación</p>
+                    <button onclick="location.reload()" class="mt-4 px-4 py-2 bg-primary rounded-lg">Reintentar</button>
+                </div>
+            `;
+        }
+        return [];
+    }
+}
+
+function getNombreCliente(idCliente) {
+    return clientesMap[idCliente] || `Cliente ${idCliente}`;
+}
+
+function normalizarFecha(fechaAPI) {
+    if (!fechaAPI) return null;
+    if (fechaAPI.match(/^\d{4}-\d{2}-\d{2}$/)) return fechaAPI;
+    return fechaAPI.split('T')[0];
+}
+
+function obtenerPedidosPorMes(mes, año) {
+    return pedidosCache.filter(pedido => {
+        if (!pedido.fecha_entrega) return false;
+        const fechaNormalizada = normalizarFecha(pedido.fecha_entrega);
+        const [year, month] = fechaNormalizada.split('-');
+        return parseInt(year) === año && parseInt(month) === (mes + 1);
+    });
+}
+
+// ============================================
+// 4. FUNCIÓN PARA REDIRIGIR A NUEVO PEDIDO
+// ============================================
+
+window.crearNuevoPedido = function(fecha) {
+    console.log("🖱️ Click en crear nuevo pedido para fecha:", fecha);
+    
+    if (!fecha) {
+        console.error('No se proporcionó fecha');
+        alert('Error: No se pudo obtener la fecha seleccionada');
+        return;
+    }
+    
+    let fechaFormateada = fecha;
+    if (fechaFormateada.includes('T')) {
+        fechaFormateada = fechaFormateada.split('T')[0];
+    }
+    
+    const url = `pedido_nuevo.html?fecha=${fechaFormateada}`;
+    console.log(`📅 Redirigiendo a: ${url}`);
+    window.location.href = url;
+};
+
+// ============================================
+// 5. FUNCIONES DEL CALENDARIO (CORREGIDO)
+// ============================================
+
+function obtenerDiasDelMes(mes, año) {
+    return new Date(año, mes + 1, 0).getDate();
+}
+
+function obtenerPrimerDiaSemana(mes, año) {
+    return new Date(año, mes, 1).getDay();
+}
+
+function esFechaHoy(fechaStr) {
+    const hoy = new Date();
+    const fechaComparar = new Date(fechaStr);
+    return hoy.getUTCFullYear() === fechaComparar.getUTCFullYear() &&
+           hoy.getUTCMonth() === fechaComparar.getUTCMonth() &&
+           hoy.getUTCDate() === fechaComparar.getUTCDate();
+}
+
+// FUNCIÓN CORREGIDA - Obtener color según estado
+function getColorPorEstado(idEstado) {
+    return estadoConfig[idEstado]?.color || 'bg-gray-300';
+}
+
+function getTextoEstado(idEstado) {
+    return estadoConfig[idEstado]?.nombre || 'Desconocido';
+}
+
+function generarCalendario(mes, año) {
+    const diasEnMes = obtenerDiasDelMes(mes, año);
+    const primerDia = obtenerPrimerDiaSemana(mes, año);
+    const pedidosDelMes = obtenerPedidosPorMes(mes, año);
+    
+    const dias = [];
+    
+    for (let i = 0; i < primerDia; i++) {
+        dias.push({ dia: null, pedidos: [], fecha: null });
+    }
+    
+    for (let dia = 1; dia <= diasEnMes; dia++) {
+        const mesStr = String(mes + 1).padStart(2, '0');
+        const diaStr = String(dia).padStart(2, '0');
+        const fechaStr = `${año}-${mesStr}-${diaStr}`;
+        const pedidosDelDia = pedidosDelMes.filter(p => normalizarFecha(p.fecha_entrega) === fechaStr);
+        
+        dias.push({
+            dia: dia,
+            fecha: fechaStr,
+            pedidos: pedidosDelDia,
+            esHoy: esFechaHoy(fechaStr)
+        });
+    }
+    
+    const celdasFaltantes = 42 - dias.length;
+    for (let i = 0; i < celdasFaltantes; i++) {
+        dias.push({ dia: null, pedidos: [], fecha: null });
+    }
+    
+    return dias;
+}
+
+// ============================================
+// 6. RENDERIZADO DEL CALENDARIO
+// ============================================
+
+let mesActual = new Date().getMonth();
+let añoActual = new Date().getFullYear();
+
+function renderizarCalendario() {
+    const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    
+    const tituloMes = document.getElementById('tituloMes');
+    if (tituloMes) {
+        tituloMes.textContent = `${meses[mesActual]} ${añoActual}`;
+    }
+    
+    const dias = generarCalendario(mesActual, añoActual);
+    const contenedor = document.getElementById('calendarioDias');
+    
+    if (!contenedor) return;
+    
+    contenedor.innerHTML = '';
+    
+    dias.forEach(dia => {
+        const celda = document.createElement('div');
+        celda.className = `border-r border-b border-slate-100 dark:border-slate-800 p-3 transition-colors group ${
+            dia.esHoy ? 'bg-primary/20' : 'hover:bg-primary/5'
+        }`;
+        
+        if (dia.dia === null) {
+            celda.className += ' bg-slate-50/30 dark:bg-slate-900/30';
+            celda.innerHTML = '';
+        } else {
+            const hoyClass = dia.esHoy ? 'bg-primary text-slate-900 shadow-sm' : 'text-slate-400';
+            
+            celda.innerHTML = `
+                <div class="flex justify-between items-start mb-2">
+                    <span class="size-7 flex items-center justify-center rounded-full text-sm font-black ${hoyClass}">${dia.dia}</span>
+                    <button onclick="window.crearNuevoPedido('${dia.fecha}')"
+                        class="opacity-0 group-hover:opacity-100 text-primary hover:bg-primary/10 rounded-full p-1 transition-all inline-block cursor-pointer"
+                        title="Agregar pedido para el ${dia.dia}/${mesActual+1}/${añoActual}">
+                        <span class="material-symbols-outlined text-sm">+</span>
+                    </button>
+                </div>
+                <div class="flex flex-col gap-1 max-h-24 overflow-y-auto">
+                    ${dia.pedidos.map(pedido => `
+                        <div class="px-2 py-1 rounded ${getColorPorEstado(pedido.id_estado)} text-[10px] font-bold text-slate-900 truncate cursor-pointer hover:opacity-80 transition-opacity"
+                             onclick="window.abrirModalPedido(${pedido.id_pedido})"
+                             title="Pedido #${pedido.id_pedido} - ${getTextoEstado(pedido.id_estado)}">
+                            #${pedido.id_pedido} - ${getNombreCliente(pedido.id_cliente).substring(0, 20)}
+                            <span class="ml-1 text-[8px] opacity-70">${getTextoEstado(pedido.id_estado)}</span>
+                        </div>
+                    `).join('')}
+                    ${dia.pedidos.length === 0 ? '<div class="text-[9px] text-slate-300 text-center py-1"></div>' : ''}
+                </div>
+            `;
+        }
+        
+        contenedor.appendChild(celda);
+    });
+}
+
+// ============================================
+// 7. FUNCIONES GLOBALES PARA EL MODAL (CORREGIDO)
+// ============================================
+
+window.abrirModalPedido = async function(idPedido) {
+    const pedido = pedidosCache.find(p => p.id_pedido === idPedido);
+    if (!pedido) {
+        alert('Pedido no encontrado');
+        return;
+    }
+    
+    const clienteNombre = getNombreCliente(pedido.id_cliente);
+    const fechaEntrega = normalizarFecha(pedido.fecha_entrega) || 'Sin fecha';
+    const estadoActual = pedido.id_estado;
+    const total = pedido.total ? `$${parseFloat(pedido.total).toFixed(2)}` : '$0.00';
+    
+    const modalId = `modal_${Date.now()}`;
+    
+    const modal = document.createElement('div');
+    modal.id = modalId;
+    modal.className = 'fixed inset-0 bg-black/50 flex items-center justify-center z-50';
+    modal.innerHTML = `
+        <div class="bg-white dark:bg-slate-800 rounded-xl max-w-md w-full mx-4 p-6 shadow-xl">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-slate-900 dark:text-slate-100">Pedido #${pedido.id_pedido}</h3>
+                <button onclick="document.getElementById('${modalId}').remove()" class="text-slate-400 hover:text-slate-600">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            
+            <div class="space-y-3">
+                <div>
+                    <label class="text-xs text-slate-500">Cliente</label>
+                    <p class="font-semibold">${escapeHtml(clienteNombre)}</p>
+                </div>
+                <div>
+                    <label class="text-xs text-slate-500">Fecha de Entrega</label>
+                    <p class="font-semibold">${fechaEntrega}</p>
+                </div>
+                <div>
+                    <label class="text-xs text-slate-500">Total</label>
+                    <p class="font-semibold">${total}</p>
+                </div>
+                <div>
+                    <label class="text-xs text-slate-500">Estado</label>
+                    <select id="estadoSelect_${pedido.id_pedido}" class="mt-1 block w-full rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-2">
+                        <option value="2" ${estadoActual === 2 ? 'selected' : ''}>Pendiente</option>
+                        <option value="8" ${estadoActual === 8 ? 'selected' : ''}>Preparación</option>
+                        <option value="7" ${estadoActual === 7 ? 'selected' : ''}>En camino</option>
+                        <option value="5" ${estadoActual === 5 ? 'selected' : ''}>Entregado</option>
+                        <option value="6" ${estadoActual === 6 ? 'selected' : ''}>Cancelado</option>
+                        <option value="3" ${estadoActual === 3 ? 'select' : ''}>En proceso</option> 
+                    </select>
+                </div>
+            </div>
+            
+            <div class="flex gap-3 mt-6">
+                <button onclick="window.actualizarEstadoPedidoModal(${pedido.id_pedido}, '${modalId}')" 
+                        class="flex-1 bg-primary text-slate-900 px-4 py-2 rounded-lg font-semibold hover:opacity-90">
+                    Actualizar Estado
+                </button>
+                <button onclick="window.eliminarPedidoModal(${pedido.id_pedido}, '${modalId}')" 
+                        class="flex-1 bg-red-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-600">
+                    Eliminar
+                </button>
+                <a href="pedido_ver.html?id=${pedido.id_pedido}" 
+                   class="flex-1 text-center px-4 py-2 rounded-lg border border-slate-200 hover:bg-slate-50">
+                    Ver Detalles
+                </a>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+};
+
+window.actualizarEstadoPedidoModal = async function(id, modalId) {
+    const select = document.getElementById(`estadoSelect_${id}`);
+    if (!select) {
+        console.error('No se encontró el select para el pedido', id);
+        alert('Error: No se pudo encontrar el selector de estado');
+        return;
+    }
+    
+    const nuevoEstadoAPI = parseInt(select.value);
+    const nuevoEstadoLocal = estadoConfig[nuevoEstadoAPI]?.local;
+    
+    if (!nuevoEstadoLocal) {
+        alert('Estado inválido');
+        return;
+    }
+    
+    console.log(`🔄 Actualizando pedido ${id}: Estado API=${nuevoEstadoAPI} → ${estadoConfig[nuevoEstadoAPI]?.nombre}`);
+    
+    const exito = await actualizarEstadoPedido(id, nuevoEstadoLocal);
+    
+    if (exito) {
+        const modal = document.getElementById(modalId);
+        if (modal) modal.remove();
+        
+        await recargarDatosYRenderizar();
+    } else {
+        alert(`❌ Error al actualizar el pedido #${id}. Revisa la consola para más detalles.`);
+    }
+};
+
+window.eliminarPedidoModal = async function(id, modalId) {
+    const exito = await eliminarPedido(id);
+    if (exito) {
+        const modal = document.getElementById(modalId);
+        if (modal) modal.remove();
+        await recargarDatosYRenderizar();
+        alert(`✅ Pedido #${id} eliminado correctamente`);
+    }
+};
+
+async function actualizarEstadoPedido(id, nuevoEstadoLocal) {
+    if (!verificarToken()) return false;
+    
+    const nuevoEstadoAPI = estadoMapLocalToAPI[nuevoEstadoLocal];
+    if (!nuevoEstadoAPI) {
+        console.error('Estado inválido:', nuevoEstadoLocal);
+        return false;
+    }
+    
+    try {
+        const response = await fetch(`${API_BASE}/pedidos/${id}/`, {
+            method: 'PUT',
+            headers: getHeaders(),
+            body: JSON.stringify({ id_estado: nuevoEstadoAPI })
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.detail || `Error HTTP: ${response.status}`);
+        }
+        
+        // Actualizar el pedido en el caché
+        const pedidoIndex = pedidosCache.findIndex(p => p.id_pedido === id);
+        if (pedidoIndex !== -1) {
+            pedidosCache[pedidoIndex].id_estado = nuevoEstadoAPI;
+        }
+        
+        console.log(`✅ Pedido ${id} actualizado a estado: ${nuevoEstadoLocal} (API: ${nuevoEstadoAPI})`);
+        return true;
+    } catch (error) {
+        console.error('❌ Error actualizando pedido:', error);
+        alert('Error al actualizar el estado. Intenta nuevamente.');
+        return false;
+    }
+}
+
+async function eliminarPedido(id) {
+    if (!verificarToken()) return false;
+    
+    if (!confirm(`¿Estás seguro de eliminar el pedido #${id}?`)) {
+        return false;
+    }
+    
+    try {
+        const response = await fetch(`${API_BASE}/pedidos/${id}/`, {
+            method: 'DELETE',
+            headers: getHeaders()
+        });
+        
+        if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+        
+        pedidosCache = pedidosCache.filter(p => p.id_pedido !== id);
+        console.log(`✅ Pedido ${id} eliminado correctamente`);
+        return true;
+    } catch (error) {
+        console.error('❌ Error eliminando pedido:', error);
+        alert('Error al eliminar el pedido. Intenta nuevamente.');
+        return false;
+    }
+}
+
+// ============================================
+// 8. FUNCIONES DE NAVEGACIÓN
+// ============================================
+
+function mesAnterior() {
+    mesActual--;
+    if (mesActual < 0) {
+        mesActual = 11;
+        añoActual--;
+    }
+    renderizarCalendario();
+}
+
+function mesSiguiente() {
+    mesActual++;
+    if (mesActual > 11) {
+        mesActual = 0;
+        añoActual++;
+    }
+    renderizarCalendario();
+}
+
+async function recargarDatosYRenderizar() {
+    const contenedor = document.getElementById('calendarioDias');
+    if (contenedor) {
+        contenedor.innerHTML = '<div class="skeleton" style="grid-column: span 7; height: 140px;"></div>';
+    }
+    
+    await cargarClientes();
+    await cargarPedidosDesdeAPI();
+    renderizarCalendario();
+}
+
+// ============================================
+// 9. INICIALIZACIÓN
+// ============================================
+
+async function inicializar() {
+    TOKEN = localStorage.getItem('token') || localStorage.getItem('Token');
+    if (!TOKEN) {
+        alert('❌ Sesión no iniciada. Por favor, inicia sesión.');
+        window.location.href = '/index.html';
+        return;
+    }
+    
+    const usuario = localStorage.getItem("usuario") || localStorage.getItem("username");
+    const rol = localStorage.getItem("rol");
+    if (usuario) document.getElementById("textoUsuario").innerText = usuario;
+    if (rol) document.getElementById("textoRol").innerText = rol;
+    
+    await cargarClientes();
+    await cargarPedidosDesdeAPI();
+    renderizarCalendario();
+    
+    const btnMenuPrincipal = document.getElementById('btnMenuPrincipal');
+    if (btnMenuPrincipal) {
+        btnMenuPrincipal.addEventListener('click', () => {
+            window.location.href = "menu.html";
+        });
+    }
+    
+    const btnMesAnterior = document.getElementById('btnMesAnterior');
+    if (btnMesAnterior) {
+        btnMesAnterior.addEventListener('click', mesAnterior);
+    }
+    
+    const btnMesSiguiente = document.getElementById('btnMesSiguiente');
+    if (btnMesSiguiente) {
+        btnMesSiguiente.addEventListener('click', mesSiguiente);
+    }
+    
+    console.log('✅ Calendario inicializado correctamente');
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : (m === '<' ? '&lt;' : '&gt;'));
+}
+
+document.addEventListener('DOMContentLoaded', inicializar);
+</script>
+
+</body>
+</html>

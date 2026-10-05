@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script>
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: {
+                    "primary": "#5d1927",
+                    "background-light": "#f8f6f6",
+                    "background-dark": "#1f1316",
+                    "accent-pink": "#FEBDC6",
+                },
+                fontFamily: { "sans": ["Montserrat", "sans-serif"] },
+                borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px" },
+            },
+        },
+    }
+</script>
+</head>
+<body class="bg-[#FEBDC6] min-h-screen flex items-center justify-center p-4">
+<div class="bg-white w-full max-w-[1280px] rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+    <header class="flex items-center justify-between border-b border-slate-100 px-10 py-6 bg-white">
+        <div class="flex items-center gap-4">
+            <div class="bg-primary/10 p-3 rounded-xl text-primary">
+                <span class="material-symbols-outlined text-3xl">restaurant_menu</span>
+            </div>
+            <div>
+                <h1 class="text-slate-900 text-2xl font-extrabold tracking-tight">Detalle de Receta</h1>
+                <p class="text-slate-500 text-sm">Ingredientes y preparación</p>
+            </div>
+        </div>
+        <a href="recetas.html" class="text-slate-400 hover:text-slate-600 transition-colors">
+            <span class="material-symbols-outlined">close</span>
+        </a>
+    </header>
+    <main class="flex-1 overflow-y-auto p-10 bg-slate-50/50">
+        <div class="max-w-4xl mx-auto space-y-8">
+            <section class="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm">
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="material-symbols-outlined text-primary">info</span>
+                    <h2 class="text-lg font-bold text-slate-900">Descripción</h2>
+                </div>
+                <p id="descripcion" class="text-slate-700 text-lg font-semibold">Cargando...</p>
+                <div class="mt-4 flex items-center gap-2 text-sm font-semibold text-primary/70">
+                    <span class="material-symbols-outlined text-lg">person</span>
+                    <span>Creada por: <span id="usuario-receta">Cargando...</span></span>
+                </div>
+            </section>
+            <section class="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm">
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="material-symbols-outlined text-primary">inventory_2</span>
+                    <h2 class="text-lg font-bold text-slate-900">Ingredientes</h2>
+                </div>
+                <div id="lista-ingredientes" class="space-y-3">
+                    <p class="text-slate-400 text-sm">Cargando ingredientes...</p>
+                </div>
+            </section>
+        </div>
+    </main>
+    <footer class="border-t border-slate-100 p-8 flex justify-end bg-white">
+        <a href="recetas.html" class="px-8 py-3 rounded-xl bg-primary text-white font-bold hover:bg-primary/95 transition-all">Volver</a>
+    </footer>
+</div>
+
+<script>
+    const API_BASE = 'http://127.0.0.1:8000/api';
+    const TOKEN = localStorage.token;
+
+    function getHeaders() {
+        return { 'accept': 'application/json', 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' };
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const recetaId = urlParams.get('id');
+    if (!recetaId) {
+        alert('No se especificó receta');
+        window.location.href = 'recetas.html';
+    }
+
+    let unidadesMap = {};
+
+    async function cargarUnidades() {
+        try {
+            const res = await fetch(`${API_BASE}/unidad_medida/`, { headers: getHeaders() });
+            if (res.ok) {
+                const unidades = await res.json();
+                unidades.forEach(u => {
+                    const texto = u.descripcion ? `${u.descripcion} (${u.abreviatura})` : u.abreviatura || `Unidad ${u.id_unidad}`;
+                    unidadesMap[u.id_unidad] = texto;
+                });
+            }
+        } catch(e) { console.error('Error cargando unidades', e); }
+    }
+
+    async function cargarReceta() {
+        try {
+            const res = await fetch(`${API_BASE}/receta/recetas/${recetaId}`, { headers: getHeaders() });
+            if (!res.ok) throw new Error();
+            const receta = await res.json();
+            document.getElementById('descripcion').innerText = receta.descripcion || 'Sin descripción';
+            document.getElementById('usuario-receta').innerText = receta.usuario || (receta.id_usuario ? `Usuario ${receta.id_usuario}` : 'Sin usuario');
+        } catch(e) {
+            document.getElementById('descripcion').innerText = 'Error al cargar receta';
+            document.getElementById('usuario-receta').innerText = 'No disponible';
+        }
+    }
+
+    async function cargarIngredientes() {
+        try {
+            await cargarUnidades();
+
+            const res = await fetch(`${API_BASE}/receta_materia_prima/`, { headers: getHeaders() });
+            if (!res.ok) throw new Error();
+            const todas = await res.json();
+            const misIngredientes = todas.filter(rel => rel.id_receta == recetaId);
+            const container = document.getElementById('lista-ingredientes');
+
+            if (misIngredientes.length === 0) {
+                container.innerHTML = '<p class="text-slate-400 text-sm">No hay ingredientes registrados.</p>';
+                return;
+            }
+
+            container.innerHTML = '';
+            for (const rel of misIngredientes) {
+                const mpRes = await fetch(`${API_BASE}/materia_prima/${rel.id_materia}`, { headers: getHeaders() });
+                if (!mpRes.ok) continue;
+                const mp = await mpRes.json();
+                const unidadTexto = unidadesMap[mp.id_unidad] || 'unidad';
+
+                const div = document.createElement('div');
+                div.className = 'flex justify-between items-center p-3 bg-slate-50 rounded-xl flex-wrap gap-2';
+                div.innerHTML = `
+                    <div>
+                        <span class="font-bold text-slate-800">${escapeHtml(mp.descripcion)}</span>
+                    </div>
+                    <div class="text-sm font-medium text-primary">
+                        Cantidad: ${rel.cantidad} ${escapeHtml(unidadTexto)}
+                    </div>
+                `;
+                container.appendChild(div);
+            }
+        } catch(e) {
+            console.error(e);
+            document.getElementById('lista-ingredientes').innerHTML = '<p class="text-red-500">Error al cargar ingredientes</p>';
+        }
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : (m === '<' ? '&lt;' : '&gt;'));
+    }
+
+    cargarReceta();
+    cargarIngredientes();
+</script>
+</body>
+</html>  

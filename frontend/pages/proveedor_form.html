@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Registrar Proveedor - Nonna DB</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+<script>
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: { "primary": "#5d1927", "accent-pink": "#FEBDC6" },
+                fontFamily: { "sans": ["Montserrat", "sans-serif"] },
+                borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px" },
+            },
+        },
+    }
+</script>
+<style>
+    body { font-family: "Montserrat", sans-serif; }
+    .modal-mensaje { transition: opacity 0.3s ease, visibility 0.3s ease; }
+    .input-error { border-color: #ef4444 !important; background-color: #fef2f2 !important; }
+    .error-message { color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: flex; align-items: center; gap: 0.25rem; }
+    input[type=number] { -moz-appearance: textfield; }
+    input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+</style>
+</head>
+<body class="bg-[#FEBDC6] min-h-screen flex items-center justify-center p-4">
+
+<!-- VERIFICAR TOKEN -->
+<script>
+    if (!localStorage.token) {
+        const modal = document.createElement('div');
+        modal.innerHTML = `<div class="fixed inset-0 flex items-center justify-center z-50"><div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div><div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 text-center shadow-2xl"><span class="material-symbols-outlined text-red-600 text-5xl">error</span><h3 class="text-xl font-bold mt-4">Sin sesión activa</h3><p class="text-slate-500 mt-2">No hay sesión activa. Redirigiendo al login...</p><button onclick="window.location.href='/index.html'" class="mt-6 w-full bg-[#5d1927] text-white font-bold py-2 px-4 rounded-xl">Ir al login</button></div></div>`;
+        document.body.appendChild(modal);
+    }
+</script>
+
+<div class="bg-white w-full max-w-[900px] rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+    <!-- Header -->
+    <header class="flex items-center justify-between border-b border-slate-100 px-10 py-6 bg-white">
+        <div class="flex items-center gap-4">
+            <div class="bg-primary/10 p-3 rounded-xl text-primary">
+                <span class="material-symbols-outlined text-3xl">storefront</span>
+            </div>
+            <div>
+                <h1 id="form-titulo" class="text-slate-900 text-2xl font-extrabold tracking-tight">Registrar Nuevo Proveedor</h1>
+                <p class="text-slate-500 text-sm">Nonna DB · Administración de Proveedores</p>
+            </div>
+        </div>
+        <a href="proveedores.html" class="text-slate-400 hover:text-slate-600 transition-colors">
+            <span class="material-symbols-outlined">close</span>
+        </a>
+    </header>
+
+    <main class="flex-1 overflow-y-auto p-10 bg-slate-50/50">
+        <div class="max-w-2xl mx-auto space-y-8">
+            <section class="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm">
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="material-symbols-outlined text-primary">info</span>
+                    <h2 class="text-lg font-bold text-slate-900">Datos del Proveedor</h2>
+                </div>
+                <form id="form-proveedor" class="grid grid-cols-1 gap-6">
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-bold text-slate-700">Descripción / Nombre *</label>
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xl">storefront</span>
+                            <input id="descripcion" class="w-full rounded-xl border-slate-200 bg-slate-50 pl-11 pr-4 py-3 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="Ej. Distribuidora Central S.A." type="text" required>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-bold text-slate-700">Dirección</label>
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xl">location_on</span>
+                            <input id="direccion" class="w-full rounded-xl border-slate-200 bg-slate-50 pl-11 pr-4 py-3 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="Dirección del proveedor" type="text">
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-bold text-slate-700">Contacto (Teléfono)</label>
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xl">call</span>
+                            <input id="contacto" class="w-full rounded-xl border-slate-200 bg-slate-50 pl-11 pr-4 py-3 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="Ej. 5512345678" maxlength="10" type="text">
+                        </div>
+                        <div id="contacto-error" class="error-message hidden">
+                            <span class="material-symbols-outlined text-sm">error</span>
+                            <span>El teléfono solo debe contener números y máximo 10 dígitos</span>
+                        </div>
+                    </div>
+                </form>
+            </section>
+        </div>
+    </main>
+
+    <footer class="border-t border-slate-100 p-8 flex justify-end gap-4 bg-white">
+        <a href="proveedores.html" class="px-8 py-3 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-all">Cancelar</a>
+        <button type="submit" form="form-proveedor" id="btn-submit" class="px-10 py-3 rounded-xl bg-primary text-white font-bold hover:bg-primary/95 transition-all shadow-lg shadow-primary/30 flex items-center gap-2">
+            <span class="material-symbols-outlined">check_circle</span> Guardar Proveedor
+        </button>
+    </footer>
+</div>
+
+<!-- MODALES -->
+<div id="modal-exito" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4"><span class="material-symbols-outlined text-green-600 text-5xl">check_circle</span></div>
+        <h3 class="text-xl font-bold text-slate-900">¡Éxito!</h3>
+        <p id="exito-mensaje" class="text-slate-500 mt-2"></p>
+        <button id="btn-cerrar-exito" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Continuar</button>
+    </div>
+</div>
+<div id="modal-error" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4"><span class="material-symbols-outlined text-red-600 text-5xl">error</span></div>
+        <h3 class="text-xl font-bold text-slate-900">Error</h3>
+        <p id="error-mensaje" class="text-slate-500 mt-2"></p>
+        <button id="btn-cerrar-error" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Aceptar</button>
+    </div>
+</div>
+<div id="modal-warning" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4"><span class="material-symbols-outlined text-amber-500 text-5xl">warning</span></div>
+        <h3 class="text-xl font-bold text-slate-900">Campos incompletos</h3>
+        <p id="warning-mensaje" class="text-slate-500 mt-2"></p>
+        <button id="btn-cerrar-warning" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Aceptar</button>
+    </div>
+</div>
+
+<script>
+    const API_BASE = 'http://127.0.0.1:8000/api';
+    const TOKEN = localStorage.token;
+
+    function getHeaders() {
+        return { 'accept': 'application/json', 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' };
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const proveedorId = urlParams.get('id');
+
+    function mostrarExito(mensaje, callback) {
+        const modal = document.getElementById('modal-exito');
+        document.getElementById('exito-mensaje').innerText = mensaje;
+        modal.classList.remove('hidden');
+        document.getElementById('btn-cerrar-exito').onclick = () => { modal.classList.add('hidden'); if (callback) callback(); };
+    }
+    function mostrarError(mensaje) {
+        const modal = document.getElementById('modal-error');
+        document.getElementById('error-mensaje').innerText = mensaje;
+        modal.classList.remove('hidden');
+        document.getElementById('btn-cerrar-error').onclick = () => modal.classList.add('hidden');
+    }
+    function mostrarWarning(mensaje) {
+        const modal = document.getElementById('modal-warning');
+        document.getElementById('warning-mensaje').innerText = mensaje;
+        modal.classList.remove('hidden');
+        document.getElementById('btn-cerrar-warning').onclick = () => modal.classList.add('hidden');
+    }
+
+    function validarTelefono(telefono) {
+        if (!telefono) return { valido: true, mensaje: '' };
+        if (!/^[0-9]+$/.test(telefono)) return { valido: false, mensaje: 'El teléfono solo debe contener números' };
+        if (telefono.length !== 10) return { valido: false, mensaje: 'El teléfono debe tener exactamente 10 dígitos' };
+        return { valido: true, mensaje: '' };
+    }
+    function mostrarErrorTelefono(mostrar, mensaje = '') {
+        const input = document.getElementById('contacto');
+        const errorDiv = document.getElementById('contacto-error');
+        if (mostrar) { input.classList.add('input-error'); errorDiv.classList.remove('hidden'); const s = errorDiv.querySelector('span:last-child'); if (s) s.textContent = mensaje; }
+        else { input.classList.remove('input-error'); errorDiv.classList.add('hidden'); }
+    }
+
+    const contactoInput = document.getElementById('contacto');
+    contactoInput.addEventListener('input', function() {
+        let soloNumeros = this.value.replace(/[^0-9]/g, '').slice(0, 10);
+        this.value = soloNumeros;
+        const validacion = validarTelefono(soloNumeros);
+        if (!validacion.valido && soloNumeros.length > 0) mostrarErrorTelefono(true, validacion.mensaje);
+        else mostrarErrorTelefono(false);
+    });
+    contactoInput.addEventListener('blur', function() {
+        const validacion = validarTelefono(this.value);
+        if (!validacion.valido && this.value.length > 0) mostrarErrorTelefono(true, validacion.mensaje);
+        else mostrarErrorTelefono(false);
+    });
+    contactoInput.addEventListener('keypress', function(e) {
+        if (!/[0-9]/.test(String.fromCharCode(e.which || e.keyCode))) { e.preventDefault(); mostrarWarning('Solo se permiten números en el teléfono'); }
+    });
+
+    async function crearProveedor(datos) {
+        const res = await fetch(`${API_BASE}/proveedor/`, { method: 'POST', headers: getHeaders(), body: JSON.stringify(datos) });
+        if (!res.ok) { const err = await res.json(); throw new Error(err.detail || err.message || 'Error al crear proveedor'); }
+        return res.json();
+    }
+    async function actualizarProveedor(id, datos) {
+        const res = await fetch(`${API_BASE}/proveedor/${id}`, { method: 'PUT', headers: getHeaders(), body: JSON.stringify(datos) });
+        if (!res.ok) { const err = await res.json(); throw new Error(err.detail || err.message || 'Error al actualizar proveedor'); }
+        return res.json();
+    }
+    async function obtenerProveedor(id) {
+        const res = await fetch(`${API_BASE}/proveedor/${id}`, { headers: getHeaders() });
+        if (!res.ok) throw new Error(`Error ${res.status}`);
+        return res.json();
+    }
+
+    async function cargarDatosEdicion() {
+        if (!proveedorId) return;
+        try {
+            const proveedor = await obtenerProveedor(proveedorId);
+            document.getElementById('descripcion').value = proveedor.descripcion || '';
+            document.getElementById('direccion').value = proveedor.direccion || '';
+            document.getElementById('contacto').value = proveedor.contacto || '';
+            document.getElementById('form-titulo').innerText = 'Editar Proveedor';
+        } catch (error) {
+            mostrarError('Error al cargar los datos: ' + error.message);
+            setTimeout(() => { window.location.href = 'proveedores.html'; }, 2000);
+        }
+    }
+
+    const form = document.getElementById('form-proveedor');
+    const submitBtn = document.getElementById('btn-submit');
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const descripcion = document.getElementById('descripcion').value.trim();
+        const direccion = document.getElementById('direccion').value.trim();
+        const contacto = document.getElementById('contacto').value.trim();
+
+        if (!descripcion) { mostrarWarning('La descripción (nombre) del proveedor es obligatoria'); return; }
+        const validacionTelefono = validarTelefono(contacto);
+        if (!validacionTelefono.valido) { mostrarErrorTelefono(true, validacionTelefono.mensaje); mostrarWarning(validacionTelefono.mensaje); return; }
+
+        const datos = { descripcion, direccion: direccion || null, contacto: contacto || null };
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<span class="material-symbols-outlined animate-spin text-lg">progress_activity</span> Guardando...';
+        submitBtn.disabled = true;
+
+        try {
+            if (proveedorId) {
+                await actualizarProveedor(proveedorId, datos);
+                mostrarExito('Proveedor actualizado correctamente.', () => { window.location.href = 'proveedores.html'; });
+            } else {
+                await crearProveedor(datos);
+                mostrarExito('Proveedor creado correctamente.', () => { window.location.href = 'proveedores.html'; });
+            }
+        } catch (error) {
+            let errorMsg = error.message;
+            if (errorMsg.includes('duplicate') || errorMsg.toLowerCase().includes('unique')) errorMsg = 'Ya existe un proveedor con ese nombre.';
+            mostrarError('Error al guardar: ' + errorMsg);
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
+    });
+
+    cargarDatosEdicion();
+</script>
+</body>
+</html>

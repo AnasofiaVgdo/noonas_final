@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#5d1927",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#1f1316",
+                    },
+                    fontFamily: {
+                        display: ["Plus Jakarta Sans", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.25rem",
+                        lg: "0.5rem",
+                        xl: "0.75rem",
+                        full: "9999px",
+                    },
+                },
+            },
+        };
+    </script>
+    <style>
+        body {
+            font-family: "Plus Jakarta Sans", sans-serif;
+        }
+    </style>
+</head>
+
+<body class="dark:bg-background-dark min-h-screen flex flex-col bg-[#febdc6]">
+    <!-- Top Navigation Bar -->
+    <header
+        class="w-full bg-[#f3dfe0] dark:bg-slate-900 border-b border-primary/10 px-6 py-4 flex items-center justify-between sticky top-0 z-50">
+        <div class="flex items-center gap-3">
+            <div class="bg-primary p-2 rounded-lg text-white">
+                <span class="material-symbols-outlined block text-2xl">bakery_dining</span>
+            </div>
+            <h1 class="text-primary text-xl font-bold tracking-tight">Nonna</h1>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="flex items-center gap-3 pl-4 border-l border-slate-200 dark:border-slate-700">
+                <div class="text-right hidden sm:block">
+                    <p id="textoUsuario" class="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                        Nombre de usuario
+                    </p>
+                    <p id="textoRol" class="text-xs text-slate-500">Rol</p>
+                </div>
+            </div>
+            <!-- Botón de Cerrar Sesión -->
+            <button id="botonCerrarSesion"
+                class="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all duration-300 shadow-md hover:shadow-lg">
+                <span class="material-symbols-outlined text-xl">logout</span>
+                <span class="hidden sm:inline text-sm font-medium">Cerrar Sesión</span>
+            </button>
+        </div>
+    </header>
+    <main class="flex-1 max-w-6xl mx-auto w-full p-6 md:p-10">
+        <!-- Hero Section -->
+        <div class="relative overflow-hidden rounded-xl mb-10 bg-primary h-48 md:h-64 flex items-end p-8 group">
+            <div class="absolute inset-0 opacity-40 bg-gradient-to-t from-black/80 to-transparent z-10"></div>
+            <div class="absolute inset-0 z-0">
+                <img class="w-full h-full object-cover grayscale brightness-50"
+                    alt="Delicious homemade pastries background pattern"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuAGLHA_qOxlo2MtVlZniDScbwWRAruc01SGa-Zv_mw2Sn8rLgwHWZRKfrtLBQ4EEmgNRD-pqp0WNbTCCSuYYz-q7FDFpvLeOHsASyz2qztOnWiNj4w3y9lpAh1XGiyka8S3YrI9nx_xAQG7vNE02MoLpqaDXpOCCJSlDTShJTPEqUv27UHgKXna_nMj1LVzB8mkCOLhmDg5N8rw4xzPjZ8foLXYJsQeDr54hzMJ8VTfljVDNURL2RqE06SMFPIJaQh1k7BHOzArZy3i" />
+            </div>
+            <div class="relative z-20 text-white">
+                <h2 class="text-3xl md:text-4xl font-bold mb-2">Hecho con amor</h2>
+                <p class="text-white/80 max-w-md">
+                    Bienvenido de nuevo al panel central de Nonna. Gestiona tus pedidos
+                    y clientes con facilidad.
+                </p>
+            </div>
+        </div>
+        <!-- Dashboard Title -->
+        <div class="mb-8">
+            <h3 class="text-2xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">dashboard</span>
+                Panel de Control
+            </h3>
+            <div class="h-1 w-20 bg-primary mt-1 rounded-full"></div>
+        </div>
+        <!-- Navigation Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4x1 mx-auto">
+            <!-- Calendario de Pedidos -->
+            <button id="botonCalendario"
+                class="flex flex-col items-center justify-center p-8 bg-white dark:bg-slate-800 rounded-xl border border-primary/5 shadow-sm hover:shadow-xl hover:border-primary/20 transition-all group text-center aspect-square">
+                <div
+                    class="size-20 rounded-full bg-primary/5 text-primary flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-white transition-colors duration-300">
+                    <span class="material-symbols-outlined text-4xl">calendar_month</span>
+                </div>
+                <h4 class="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2">
+                    Calendario de Pedidos
+                </h4>
+                <p class="text-sm text-slate-500 px-4">
+                    Visualiza y gestiona las entregas programadas.
+                </p>
+            </button>
+
+            <!-- CRUD's del Sistema (ahora redirige a menu.html) -->
+            <button id="botonCruds"
+                class="flex flex-col items-center justify-center p-8 bg-white dark:bg-slate-800 rounded-xl border border-primary/5 shadow-sm hover:shadow-xl hover:border-primary/20 transition-all group text-center aspect-square">
+                <div
+                    class="size-20 rounded-full bg-primary/5 text-primary flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-white transition-colors duration-300">
+                    <span class="material-symbols-outlined text-4xl">database</span>
+                </div>
+                <h4 class="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2">
+                    CRUD's del Sistema
+                </h4>
+                <p class="text-sm text-slate-500 px-4">
+                    Administra productos, clientes y categorías.
+                </p>
+            </button>
+            <!-- Generar Reportes -->
+            <button id="botonReportes"
+                class="flex flex-col items-center justify-center p-8 bg-white dark:bg-slate-800 rounded-xl border border-primary/5 shadow-sm hover:shadow-xl hover:border-primary/20 transition-all group text-center aspect-square">
+                <div
+                    class="size-20 rounded-full bg-primary/5 text-primary flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-white transition-colors duration-300">
+                    <span class="material-symbols-outlined text-4xl">bar_chart</span>
+                </div>
+                <h4 class="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2">
+                    Generar Reportes
+                </h4>
+                <p class="text-sm text-slate-500 px-4">
+                    Analiza el rendimiento y ventas de tu negocio.
+                </p>
+            </button>
+        </div>
+    </main>
+    <footer class="mt-auto py-6 text-center text-slate-400 text-xs border-t border-slate-200 dark:border-slate-800">
+        <p></p>
+    </footer>
+    <script>
+        // Simulación de datos de usuario (puedes cambiarlos según tu lógica)
+        document.getElementById("textoUsuario").innerText =
+            localStorage.getItem("usuario") || "Invitado";
+        document.getElementById("textoRol").innerText =
+            localStorage.getItem("rol") || "Sin rol";
+
+        // Redirección para el calendario
+        const botonCalendario = document.getElementById("botonCalendario");
+        botonCalendario.addEventListener("click", function () {
+            window.location.href = "/calendario.html";
+        });
+
+        //  Redirección para CRUD's del Sistema (hacia menu.html)
+        const botonCruds = document.getElementById("botonCruds");
+        botonCruds.addEventListener("click", function () {
+            window.location.href = "menu.html";
+        });
+        // Redirección para reportes
+        const botonReportes = document.getElementById("botonReportes");
+        botonReportes.addEventListener("click", function () {
+            window.location.href = "Generar_reportes.html";
+        });
+
+        // ✅ Cerrar Sesión - Limpiar localStorage y redirigir al login
+        const botonCerrarSesion = document.getElementById("botonCerrarSesion");
+        botonCerrarSesion.addEventListener("click", function () {
+            // Limpiar los datos de sesión del localStorage
+            localStorage.removeItem("usuario");
+            localStorage.removeItem("rol");
+            // También puedes limpiar cualquier otro dato de sesión que tengas
+            // localStorage.clear(); // Esto limpiaría todo, úsalo con cuidado
+
+            // Redirigir al login (cambia la ruta según tu estructura)
+            window.location.href = "/index.html"; // O la ruta de tu página de login
+        });
+    </script>
+</body>
+
+</html>

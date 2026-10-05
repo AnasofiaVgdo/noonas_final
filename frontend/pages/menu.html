@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: {
+                    "primary": "#5d1927",
+                    "background-light": "#febdc6",
+                    "background-dark": "#1f1316",
+                },
+                fontFamily: { "display": ["Plus Jakarta Sans"] },
+                borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+            },
+        },
+    }
+</script>
+<title>Nonna - CRUD'S DEL SISTEMA</title>
+<style>
+    .card-link {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 1.5rem;
+        padding: 2.5rem;
+        background-color: white;
+        border-radius: 0.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        border: 1px solid white;
+        text-decoration: none;
+    }
+    .card-link:hover {
+        transform: scale(1.02);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        border-color: #5d1927;
+    }
+    .card-link:hover .icon-circle {
+        background-color: #5d1927;
+        color: white;
+    }
+    .icon-circle {
+        width: 5rem;
+        height: 5rem;
+        border-radius: 9999px;
+        background-color: rgba(93, 25, 39, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #5d1927;
+        transition: all 0.3s ease;
+    }
+    .card-link span:last-child {
+        color: #5d1927;
+        font-size: 1.25rem;
+        font-weight: 700;
+    }
+</style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="layout-container flex h-full grow flex-col">
+    <!-- Top Navigation Bar Begins-->
+    <header
+        class="w-full bg-[#f3dfe0] dark:bg-slate-900 border-b border-primary/10 px-6 py-4 flex items-center justify-between sticky top-0 z-50">
+        <div class="flex items-center gap-6">
+        <div class="flex items-center gap-3">
+            <div class="bg-primary p-2 rounded-lg text-white">
+                <span class="material-symbols-outlined block text-2xl">bakery_dining</span>
+            </div>
+            <h1 class="text-primary text-xl font-bold tracking-tight">Nonna</h1>
+        </div>
+        <div class="h-8 w-[1px] bg-primary/20"></div>
+        <a href="menu.html" class="flex items-center gap-2 text-primary hover:bg-primary/10 px-4 py-2 rounded-lg transition-colors duration-200">
+                <span class="material-symbols-outlined">home</span>
+                <span class="text-sm font-bold leading-normal">Menú Principal</span>
+        </a>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="flex items-center gap-3 pl-4 border-l border-slate-200 dark:border-slate-700">
+                <div class="text-right hidden sm:block">
+                    <p id="textoUsuario" class="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                        Nombre de usuario
+                    </p>
+                    <p id="textoRol" class="text-xs text-slate-500">Rol</p>
+                </div>
+            </div>
+            <!-- Botón de Cerrar Sesión -->
+            <button id="botonCerrarSesion"
+                class="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all duration-300 shadow-md hover:shadow-lg">
+                <span class="material-symbols-outlined text-xl">logout</span>
+                <span class="hidden sm:inline text-sm font-medium">Cerrar Sesión</span>
+            </button>
+        </div>
+    </header>
+    <script>
+        document.getElementById("textoUsuario").innerText =
+            localStorage.getItem("usuario") || "Invitado";
+        document.getElementById("textoRol").innerText =
+            localStorage.getItem("rol") || "Sin rol";
+
+        const botonCerrarSesion = document.getElementById("botonCerrarSesion");
+        botonCerrarSesion.addEventListener("click", function () {
+            localStorage.clear();
+            window.location.href = "/index.html";
+        });
+    </script>
+    <!-- Top Navigation Bar Ends-->
+    
+    <main class="flex flex-1 justify-center py-12 px-10">
+        <div class="layout-content-container flex flex-col max-w-[1200px] flex-1">
+            <div class="flex flex-col gap-2 mb-10">
+                <h1 class="text-primary text-5xl font-black leading-tight tracking-[-0.033em]">CRUD'S DEL SISTEMA</h1>
+                <p class="text-primary/70 text-lg font-medium">Gestión administrativa y mantenimiento de datos maestros</p>
+            </div>
+            <!-- Grid of CRUD Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+                <!-- 1. Productos -->
+                <a href="productos.html" class="card-link group">
+                    <div class="icon-circle">
+                        <span class="material-symbols-outlined text-4xl">inventory_2</span>
+                    </div>
+                    <span>Productos</span>
+                </a>
+                <!-- 2. Recetas -->
+                <a href="recetas.html" class="card-link group">
+                    <div class="icon-circle">
+                        <span class="material-symbols-outlined text-4xl">menu_book</span>
+                    </div>
+                    <span>Recetas</span>
+                </a>
+                <!-- 3. Materia Prima -->
+                <a href="materia_prima.html" class="card-link group">
+                    <div class="icon-circle">
+                        <span class="material-symbols-outlined text-4xl">egg</span>
+                    </div>
+                    <span>Materia Prima</span>
+                </a>
+                <!-- 4. Usuarios -->
+                <a href="usuarios.html" class="card-link group">
+                    <div class="icon-circle">
+                        <span class="material-symbols-outlined text-4xl">group</span>
+                    </div>
+                    <span>Usuarios</span>
+                </a>
+                <!-- 5. Roles -->
+                <a href="roles.html" class="card-link group">
+                    <div class="icon-circle">
+                        <span class="material-symbols-outlined text-4xl">admin_panel_settings</span>
+                    </div>
+                    <span>Roles</span>
+                </a>
+                <!-- 6. Clientes -->
+                <a href="clientes.html" class="card-link group">
+                    <div class="icon-circle">
+                        <span class="material-symbols-outlined text-4xl">person_search</span>
+                    </div>
+                    <span>Clientes</span>
+                </a>
+                <!-- 7. Pedidos -->
+                <a href="pedidos.html" class="card-link group">
+                    <div class="icon-circle">
+                        <span class="material-symbols-outlined text-4xl">shopping_cart</span>
+                    </div>
+                    <span>Pedidos</span>
+                </a>
+                <!-- 8. Proveedores -->
+                <a href="proveedores.html" class="card-link group">
+                    <div class="icon-circle">
+                        <span class="material-symbols-outlined text-4xl">local_shipping</span>
+                    </div>
+                    <span>Proveedores</span>
+                </a>
+                <!-- 9. Cotizaciones -->
+                <a href="cotizaciones.html" class="card-link group">
+                    <div class="icon-circle">
+                        <span class="material-symbols-outlined text-4xl">request_quote</span>
+                    </div>
+                    <span>Cotizaciones</span>
+                </a>
+                <!-- 10. Compras (NUEVO) -->
+                <a href="compras.html" class="card-link group">
+                    <div class="icon-circle">
+                        <span class="material-symbols-outlined text-4xl">shopping_bag</span>
+                    </div>
+                    <span>Compras</span>
+                </a>
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>

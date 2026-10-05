@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Nonna - Materia Prima</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+<script>
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: {
+                    "primary": "#5d1927",
+                    "accent-pink": "#FEBDC6",
+                    "background-light": "#f8f6f6",
+                },
+                fontFamily: { "sans": ["Montserrat", "sans-serif"] },
+                borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px" },
+            },
+        },
+    }
+</script>
+<style>
+    body { font-family: "Montserrat", sans-serif; }
+    .modal-mensaje { transition: opacity 0.3s ease, visibility 0.3s ease; }
+    .custom-select {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%235d1927' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+        background-position: right 0.75rem center;
+        background-repeat: no-repeat;
+        background-size: 1.25em 1.25em;
+    }
+</style>
+</head>
+<body class="bg-[#FEBDC6] min-h-screen flex items-center justify-center p-4">
+<div class="bg-white w-full max-w-[1280px] max-h-[960px] rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+    <!-- Header -->
+    <header class="flex items-center justify-between border-b border-slate-100 px-10 py-6 bg-white">
+        <div class="flex items-center gap-4">
+            <div class="bg-primary/10 p-3 rounded-xl text-primary">
+                <span class="material-symbols-outlined text-3xl">bakery_dining</span>
+            </div>
+            <div>
+                <h1 id="form-titulo" class="text-slate-900 text-2xl font-extrabold tracking-tight">Agregar Materia Prima</h1>
+                <p class="text-slate-500 text-sm">Nonna Bakery System · Control de Inventario</p>
+            </div>
+        </div>
+        <a href="materia_prima.html" class="text-slate-400 hover:text-slate-600 transition-colors">
+            <span class="material-symbols-outlined">close</span>
+        </a>
+    </header>
+
+    <main class="flex-1 overflow-y-auto p-10 bg-slate-50/50">
+        <div class="max-w-3xl mx-auto space-y-8">
+            <section class="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm">
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="material-symbols-outlined text-primary">inventory_2</span>
+                    <h2 class="text-lg font-bold text-slate-900">Datos de la Materia Prima</h2>
+                </div>
+                <form id="form-materia" class="grid grid-cols-1 gap-6">
+                    <!-- Descripción -->
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-bold text-slate-700">Nombre / Descripción *</label>
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xl">description</span>
+                            <input id="descripcion" type="text" class="w-full rounded-xl border-slate-200 bg-slate-50 pl-11 pr-4 py-3 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="Ej. Harina de Trigo" required>
+                        </div>
+                    </div>
+
+                    <!-- Unidad de Medida -->
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-bold text-slate-700">Unidad de Medida *</label>
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xl">straighten</span>
+                            <select id="id_unidad" class="w-full rounded-xl border-slate-200 bg-slate-50 pl-11 pr-10 py-3 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all custom-select" required>
+                                <option value="">Seleccione una unidad</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Precio Unitario -->
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-bold text-slate-700">Precio Unitario *</label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-semibold">$</span>
+                            <input id="precio_unitario" type="number" step="0" class="w-full rounded-xl border-slate-200 bg-slate-50 pl-8 pr-4 py-3 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="0" required>
+                        </div>
+                    </div>
+
+                    <!-- Stock, Mínimo, Máximo -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="flex flex-col gap-2">
+                            <label class="text-sm font-bold text-slate-700">Stock Actual</label>
+                            <input id="stock_actual" type="number" step="1" class="rounded-xl border-slate-200 bg-slate-100 px-4 py-3 text-slate-400 cursor-not-allowed" value="0" readonly disabled>
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <label class="text-sm font-bold text-slate-700">Mínimo</label>
+                            <input id="minimo" type="number" step="1" class="rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all" value="0">
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <label class="text-sm font-bold text-slate-700">Máximo</label>
+                            <input id="maximo" type="number" step="1" class="rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all" value="0">
+                        </div>
+                    </div>
+
+                    <!-- Activo -->
+                    <div class="flex items-center gap-3">
+                        <input type="checkbox" id="activo" class="w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary" checked>
+                        <label for="activo" class="text-sm font-bold text-slate-700">Materia prima activa</label>
+                    </div>
+                </form>
+            </section>
+        </div>
+    </main>
+
+    <footer class="border-t border-slate-100 p-8 flex justify-end gap-4 bg-white">
+        <a href="materia_prima.html" class="px-8 py-3 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-all">Cancelar</a>
+        <button type="submit" form="form-materia" id="btn-submit" class="px-10 py-3 rounded-xl bg-primary text-white font-bold hover:bg-primary/95 transition-all shadow-lg shadow-primary/30 flex items-center gap-2">
+            <span class="material-symbols-outlined">check_circle</span> Guardar Materia Prima
+        </button>
+    </footer>
+</div>
+
+<!-- MODALES -->
+<div id="modal-exito" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4"><span class="material-symbols-outlined text-green-600 text-5xl">check_circle</span></div>
+        <h3 id="exito-titulo" class="text-xl font-bold text-slate-900">¡Éxito!</h3>
+        <p id="exito-mensaje" class="text-slate-500 mt-2"></p>
+        <button id="btn-cerrar-exito" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Continuar</button>
+    </div>
+</div>
+<div id="modal-error" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4"><span class="material-symbols-outlined text-red-600 text-5xl">error</span></div>
+        <h3 class="text-xl font-bold text-slate-900">Error</h3>
+        <p id="error-mensaje" class="text-slate-500 mt-2"></p>
+        <button id="btn-cerrar-error" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Aceptar</button>
+    </div>
+</div>
+<div id="modal-warning" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4"><span class="material-symbols-outlined text-amber-500 text-5xl">warning</span></div>
+        <h3 class="text-xl font-bold text-slate-900">Advertencia</h3>
+        <p id="warning-mensaje" class="text-slate-500 mt-2"></p>
+        <button id="btn-cerrar-warning" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Aceptar</button>
+    </div>
+</div>
+
+<script>
+    const API_BASE = 'http://127.0.0.1:8000/api';
+    const TOKEN = localStorage.token;
+
+    function getHeaders() {
+        return { 'accept': 'application/json', 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' };
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const materiaId = urlParams.get('id');
+
+    function mostrarExito(titulo, mensaje, callback) {
+        const modal = document.getElementById('modal-exito');
+        document.getElementById('exito-titulo').innerText = titulo;
+        document.getElementById('exito-mensaje').innerText = mensaje;
+        modal.classList.remove('hidden');
+        document.getElementById('btn-cerrar-exito').onclick = () => { modal.classList.add('hidden'); if (callback) callback(); };
+    }
+    function mostrarError(mensaje, callback) {
+        const modal = document.getElementById('modal-error');
+        document.getElementById('error-mensaje').innerText = mensaje;
+        modal.classList.remove('hidden');
+        document.getElementById('btn-cerrar-error').onclick = () => { modal.classList.add('hidden'); if (callback) callback(); };
+    }
+    function mostrarWarning(mensaje) {
+        const modal = document.getElementById('modal-warning');
+        document.getElementById('warning-mensaje').innerText = mensaje;
+        modal.classList.remove('hidden');
+        document.getElementById('btn-cerrar-warning').onclick = () => modal.classList.add('hidden');
+    }
+
+    async function crearMateria(datos) {
+        const res = await fetch(`${API_BASE}/materia_prima/`, { method: 'POST', headers: getHeaders(), body: JSON.stringify(datos) });
+        if (!res.ok) { const err = await res.json(); throw new Error(err.detail || 'Error al crear'); }
+        return res.json();
+    }
+    async function actualizarMateria(id, datos) {
+        const res = await fetch(`${API_BASE}/materia_prima/${id}`, { method: 'PUT', headers: getHeaders(), body: JSON.stringify(datos) });
+        if (!res.ok) { const err = await res.json(); throw new Error(err.detail || 'Error al actualizar'); }
+        return res.json();
+    }
+    async function obtenerMateria(id) {
+        const res = await fetch(`${API_BASE}/materia_prima/${id}`, { headers: getHeaders() });
+        if (!res.ok) throw new Error(`Error ${res.status}`);
+        return res.json();
+    }
+    async function listarUnidades() {
+        const res = await fetch(`${API_BASE}/unidad_medida/`, { headers: getHeaders() });
+        if (!res.ok) throw new Error('No se pudieron cargar las unidades');
+        return res.json();
+    }
+
+    async function cargarUnidadesSelect() {
+        try {
+            const unidades = await listarUnidades();
+            const select = document.getElementById('id_unidad');
+            select.innerHTML = '<option value="">Seleccione una unidad</option>';
+            unidades.forEach(u => {
+                const option = document.createElement('option');
+                option.value = u.id_unidad;
+                option.textContent = `${u.descripcion} (${u.abreviatura})`;
+                select.appendChild(option);
+            });
+        } catch (error) { mostrarError('No se pudieron cargar las unidades de medida.'); }
+    }
+
+    async function verificarDuplicado(descripcion, idActual = null) {
+        try {
+            const res = await fetch(`${API_BASE}/materia_prima/`, { headers: getHeaders() });
+            if (!res.ok) return false;
+            const materias = await res.json();
+            const descripcionNormalizada = descripcion.trim().toLowerCase();
+            return materias.some(m => {
+                const mismaDescripcion = m.descripcion && m.descripcion.trim().toLowerCase() === descripcionNormalizada;
+                if (idActual) return mismaDescripcion && m.id_materia != idActual;
+                return mismaDescripcion;
+            });
+        } catch (e) { return false; }
+    }
+
+    async function cargarDatosEdicion() {
+        if (!materiaId) return;
+        try {
+            const materia = await obtenerMateria(materiaId);
+            document.getElementById('descripcion').value = materia.descripcion || '';
+            document.getElementById('precio_unitario').value = materia.precio_unitario || '';
+            document.getElementById('stock_actual').value = materia.stock_actual || 0;
+            document.getElementById('minimo').value = materia.minimo || 0;
+            document.getElementById('maximo').value = materia.maximo || 0;
+            document.getElementById('activo').checked = materia.activo === true;
+            if (materia.id_unidad) document.getElementById('id_unidad').value = materia.id_unidad;
+            document.getElementById('form-titulo').innerText = 'Editar Materia Prima';
+        } catch (error) { mostrarError('Error al cargar los datos', () => window.location.href = 'materia_prima.html'); }
+    }
+
+    function validarMinMax() {
+        const minimo = parseFloat(document.getElementById('minimo').value);
+        const maximo = parseFloat(document.getElementById('maximo').value);
+        if (!isNaN(minimo) && !isNaN(maximo) && minimo > maximo && maximo > 0) { mostrarWarning('El valor mínimo no puede ser mayor que el máximo'); return false; }
+        if (minimo < 0) { mostrarWarning('El valor mínimo no puede ser negativo'); return false; }
+        if (maximo < 0) { mostrarWarning('El valor máximo no puede ser negativo'); return false; }
+        return true;
+    }
+
+    document.getElementById('form-materia').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const idUnidad = parseInt(document.getElementById('id_unidad').value);
+        if (isNaN(idUnidad) || idUnidad < 1) { mostrarWarning('Seleccione una unidad de medida válida'); return; }
+        const descripcion = document.getElementById('descripcion').value.trim();
+        const precio_unitario = parseFloat(document.getElementById('precio_unitario').value);
+        const stock_actual = parseFloat(document.getElementById('stock_actual').value) || 0;
+        const minimo = parseFloat(document.getElementById('minimo').value) || 0;
+        const maximo = parseFloat(document.getElementById('maximo').value) || 0;
+        const activo = document.getElementById('activo').checked;
+
+        if (!descripcion) { mostrarWarning('La descripción es obligatoria'); return; }
+        if (isNaN(precio_unitario) || precio_unitario <= 0) { mostrarWarning('El precio debe ser mayor a 0'); return; }
+        if (!validarMinMax()) return;
+
+        const esDuplicado = await verificarDuplicado(descripcion, materiaId);
+        if (esDuplicado) { mostrarWarning('Ya existe una materia prima con esa descripción. Por favor, elija otro nombre.'); return; }
+
+        const datos = { id_unidad: idUnidad, descripcion, precio_unitario, minimo, maximo, stock_actual, imagen: "", activo };
+        const btn = document.getElementById('btn-submit');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<span class="material-symbols-outlined animate-spin text-lg">progress_activity</span> Guardando...';
+        btn.disabled = true;
+
+        try {
+            if (materiaId) {
+                await actualizarMateria(materiaId, datos);
+                mostrarExito('¡Actualizada!', 'Materia prima actualizada correctamente.', () => window.location.href = 'materia_prima.html');
+            } else {
+                await crearMateria(datos);
+                mostrarExito('¡Creada!', 'Materia prima creada correctamente.', () => window.location.href = 'materia_prima.html');
+            }
+        } catch (error) {
+            let errorMsg = error.message;
+            if (errorMsg.includes('duplicate') || errorMsg.toLowerCase().includes('unique')) errorMsg = 'Ya existe una materia prima con esa descripción.';
+            mostrarError('Error al guardar: ' + errorMsg);
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    });
+
+    const minimoInput = document.getElementById('minimo');
+    const maximoInput = document.getElementById('maximo');
+    function validarEnTiempoReal() {
+        const min = parseFloat(minimoInput.value);
+        const max = parseFloat(maximoInput.value);
+        if (!isNaN(min) && !isNaN(max) && min > max && max > 0) maximoInput.setCustomValidity('El máximo debe ser mayor o igual al mínimo');
+        else maximoInput.setCustomValidity('');
+    }
+    minimoInput.addEventListener('input', validarEnTiempoReal);
+    maximoInput.addEventListener('input', validarEnTiempoReal);
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        await cargarUnidadesSelect();
+        await cargarDatosEdicion();
+    });
+</script>
+</body>
+</html>

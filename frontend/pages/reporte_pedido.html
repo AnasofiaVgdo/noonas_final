@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pedidos del Periodo - Nonna</title>
+
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        primary: "#5d1927",
+        pinkbg: "#FEBDC6"
+      },
+      fontFamily: {
+        display: ["Montserrat", "sans-serif"]
+      }
+    }
+  }
+}
+</script>
+
+<style>
+body {
+  font-family: 'Montserrat', sans-serif;
+  background: #FEBDC6;
+}
+
+.loading-spinner {
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #5d1927;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  animation: spin 1s linear infinite;
+  margin: 20px auto;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.detalle-row {
+  background: #fff1f3;
+}
+
+.pedido-row {
+  cursor: pointer;
+}
+
+.pedido-row:hover {
+  background: #fff7f9;
+}
+
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.badge-success {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.badge-muted {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.badge-warning {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.badge-danger {
+  background: #fee2e2;
+  color: #991b1b;
+}
+</style>
+</head>
+
+<body class="min-h-screen p-4">
+
+<div class="max-w-7xl mx-auto">
+
+  <div class="flex justify-between items-center mb-6">
+    <a href="Generar_reportes.html" class="flex items-center gap-2 text-primary font-semibold hover:opacity-80">
+      <span class="material-symbols-outlined">arrow_back</span>
+      <span>Volver a reportes</span>
+    </a>
+
+    <div class="flex items-center gap-3 text-primary">
+      <div class="bg-primary p-2 rounded-lg text-white">
+        <span class="material-symbols-outlined">edit_note</span>
+      </div>
+      <span class="text-2xl font-bold">Nonna</span>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+    <div class="p-6 border-b border-primary/10 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div>
+        <h1 class="text-3xl font-extrabold text-primary">Pedidos del periodo</h1>
+        <p id="periodo-texto" class="text-slate-500 mt-1">Periodo seleccionado</p>
+      </div>
+
+      <div class="flex gap-2">
+        <button onclick="abrirReporteGeneral()"
+                class="px-5 py-2.5 bg-primary text-white rounded-lg font-bold hover:bg-primary/90 flex items-center gap-2">
+          <span class="material-symbols-outlined">picture_as_pdf</span>
+          Reporte general
+        </button>
+
+        <button onclick="cargarYRenderizar()"
+                class="px-5 py-2.5 bg-primary/10 text-primary rounded-lg font-bold hover:bg-primary/20 flex items-center gap-2">
+          <span class="material-symbols-outlined">refresh</span>
+          Actualizar
+        </button>
+      </div>
+    </div>
+
+    <div class="p-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div class="border border-slate-200 rounded-xl p-4">
+          <p class="text-xs uppercase tracking-wider text-slate-500 font-bold">Pedidos encontrados</p>
+          <p id="stat-pedidos" class="text-2xl font-black text-primary mt-2">0</p>
+        </div>
+
+        <div class="border border-slate-200 rounded-xl p-4">
+          <p class="text-xs uppercase tracking-wider text-slate-500 font-bold">Total del periodo</p>
+          <p id="stat-total" class="text-2xl font-black text-primary mt-2">$0.00</p>
+        </div>
+
+        <div class="border border-slate-200 rounded-xl p-4">
+          <p class="text-xs uppercase tracking-wider text-slate-500 font-bold">Promedio por pedido</p>
+          <p id="stat-promedio" class="text-2xl font-black text-primary mt-2">$0.00</p>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="text-primary/80 text-sm font-bold border-b border-primary/10">
+              <th class="pb-3 w-8"></th>
+              <th class="pb-3">ID Pedido</th>
+              <th class="pb-3">Cliente</th>
+              <th class="pb-3">Fecha Pedido</th>
+              <th class="pb-3">Fecha Entrega</th>
+              <th class="pb-3">Estado</th>
+              <th class="pb-3 text-right">Total</th>
+              <th class="pb-3 text-right">Acciones</th>
+            </tr>
+          </thead>
+
+          <tbody id="tabla-pedidos" class="divide-y divide-primary/5">
+            <tr>
+              <td colspan="8" class="text-center py-10">
+                <div class="loading-spinner"></div>
+                <p class="text-slate-400 mt-2">Cargando pedidos...</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="text-xs text-slate-400 mt-4">
+        Haz clic sobre un pedido para mostrar u ocultar sus detalles.
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+const API_BASE = 'http://127.0.0.1:8000/api';
+const REPORTES_BASE = `${API_BASE}/reportes`;
+const TOKEN = localStorage.token;
+
+function getHeaders() {
+  return {
+    'accept': 'application/json',
+    'Authorization': `Bearer ${TOKEN}`,
+    'Content-Type': 'application/json'
+  };
+}
+
+const params = new URLSearchParams(window.location.search);
+const fechaInicio = params.get('fecha_inicio');
+const fechaFin = params.get('fecha_fin');
+
+let pedidosPeriodo = [];
+let expandedRows = new Set();
+
+document.getElementById('periodo-texto').innerText =
+  fechaInicio && fechaFin
+    ? `Periodo: ${fechaInicio} al ${fechaFin}`
+    : 'Periodo no especificado';
+
+function formatMoney(value) {
+  const num = Number(value);
+  return Number.isNaN(num)
+    ? '$0.00'
+    : `$${num.toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      })}`;
+}
+
+function formatNumber(value) {
+  const num = Number(value);
+  return Number.isNaN(num)
+    ? '0'
+    : num.toLocaleString('en-US', {
+        maximumFractionDigits: 6
+      });
+}
+
+function formatDate(value) {
+  if (!value) return '-';
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return date.toLocaleDateString('es-MX');
+}
+
+function escapeHtml(value) {
+  if (value === null || value === undefined) return '';
+
+  return String(value).replace(/[&<>"']/g, m => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  }[m]));
+}
+
+async function listarPedidos() {
+  const res = await fetch(`${API_BASE}/pedidos/`, {
+    headers: getHeaders()
+  });
+
+  if (!res.ok) {
+    throw new Error(`Error ${res.status}`);
+  }
+
+  return res.json();
+}
+
+function estaEnPeriodo(pedido) {
+  if (!fechaInicio || !fechaFin || !pedido.fecha_pedido) {
+    return true;
+  }
+
+  const fecha = pedido.fecha_pedido.slice(0, 10);
+
+  return fecha >= fechaInicio && fecha <= fechaFin;
+}
+
+function calcularStats(pedidos) {
+  const total = pedidos.reduce((acc, p) => acc + Number(p.total || 0), 0);
+  const promedio = pedidos.length ? total / pedidos.length : 0;
+
+  document.getElementById('stat-pedidos').innerText = formatNumber(pedidos.length);
+  document.getElementById('stat-total').innerText = formatMoney(total);
+  document.getElementById('stat-promedio').innerText = formatMoney(promedio);
+}
+
+function getEstadoBadgeClass(estado) {
+  const value = String(estado || '').toLowerCase();
+
+  if (value.includes('entregado')) {
+    return 'badge-success';
+  }
+
+  if (value.includes('cancel')) {
+    return 'badge-danger';
+  }
+
+  if (value.includes('pend')) {
+    return 'badge-warning';
+  }
+
+  return 'badge-muted';
+}
+
+function getTipoEntregaText(value) {
+  return value ? 'A domicilio' : 'Recoger en tienda';
+}
+
+function renderizarDetallePedido(pedido) {
+  const idPedido = pedido.id_pedido;
+  const productos = Array.isArray(pedido.productos) ? pedido.productos : [];
+
+  let productoRows = '';
+
+  if (productos.length === 0) {
+    productoRows = `
+      <tr>
+        <td colspan="5" class="text-center py-6 text-slate-400">
+          Este pedido no tiene productos registrados.
+        </td>
+      </tr>
+    `;
+  } else {
+    productoRows = productos.map(item => {
+      const cantidad = Number(item.cantidad || 0);
+      const precioDisenio = Number(item.precio_disenio || 0);
+
+      return `
+        <tr class="border-b border-primary/5">
+          <td class="py-2 font-mono text-xs">${escapeHtml(item.id_producto)}</td>
+          <td class="py-2 font-medium">${escapeHtml(item.producto)}</td>
+          <td class="py-2 text-center">${formatNumber(cantidad)}</td>
+          <td class="py-2 text-right">${formatMoney(precioDisenio)}</td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  return `
+    <tr id="detalle-${idPedido}" class="detalle-row" style="display:none;">
+      <td colspan="8" class="py-4 px-6">
+        <div class="ml-6 bg-white border border-primary/10 rounded-xl p-4">
+          <div class="flex items-start justify-between gap-4 mb-4">
+            <div class="flex items-start gap-3">
+              <span class="material-symbols-outlined text-primary">receipt_long</span>
+              <div>
+                <p class="font-bold text-primary">Detalle del pedido #${idPedido}</p>
+                <p class="text-sm text-slate-500 mt-1">
+                  Productos incluidos en este pedido.
+                </p>
+              </div>
+            </div>
+
+            <button onclick="abrirReportePedido(${idPedido})"
+                    class="px-4 py-2 bg-primary text-white rounded-lg font-bold hover:bg-primary/90 flex items-center gap-2">
+              <span class="material-symbols-outlined">picture_as_pdf</span>
+              Generar PDF
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4 text-sm">
+            <div class="bg-primary/5 rounded-xl p-3">
+              <p class="text-xs uppercase font-bold text-slate-500">Dirección</p>
+              <p class="font-semibold text-slate-800">${escapeHtml(pedido.direccion)}</p>
+            </div>
+
+            <div class="bg-primary/5 rounded-xl p-3">
+              <p class="text-xs uppercase font-bold text-slate-500">Tipo de entrega</p>
+              <p class="font-semibold text-slate-800">${escapeHtml(getTipoEntregaText(pedido.tipo_entrega))}</p>
+            </div>
+
+            <div class="bg-primary/5 rounded-xl p-3">
+              <p class="text-xs uppercase font-bold text-slate-500">Cotización</p>
+              <p class="font-semibold text-slate-800">#${escapeHtml(pedido.id_cotizacion)}</p>
+            </div>
+          </div>
+
+          ${pedido.comentario ? `
+            <div class="bg-slate-50 rounded-xl p-3 mb-4 text-sm">
+              <p class="text-xs uppercase font-bold text-slate-500">Comentario</p>
+              <p class="text-slate-700">${escapeHtml(pedido.comentario)}</p>
+            </div>
+          ` : ''}
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="text-primary/70 border-b border-primary/10">
+                  <th class="py-2 text-left">ID Producto</th>
+                  <th class="py-2 text-left">Producto</th>
+                  <th class="py-2 text-center">Cantidad</th>
+                  <th class="py-2 text-right">Precio diseño</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                ${productoRows}
+              </tbody>
+
+              <tfoot class="border-t-2 border-primary/20">
+                <tr>
+                  <td colspan="3" class="py-2 text-right font-bold">Subtotal:</td>
+                  <td class="py-2 text-right font-bold">${formatMoney(pedido.subtotal)}</td>
+                </tr>
+                <tr>
+                  <td colspan="3" class="py-2 text-right font-bold">Envío:</td>
+                  <td class="py-2 text-right font-bold">${formatMoney(pedido.precio_envio)}</td>
+                </tr>
+
+                <tr>
+                  <td colspan="3" class="py-2 text-right font-bold text-primary">Total pedido:</td>
+                  <td class="py-2 text-right font-bold text-primary">${formatMoney(pedido.total)}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      </td>
+    </tr>
+  `;
+}
+
+function toggleDetalle(idPedido) {
+  const row = document.getElementById(`detalle-${idPedido}`);
+  const icon = document.getElementById(`icon-${idPedido}`);
+
+  if (!row) return;
+
+  const isHidden = row.style.display === 'none';
+
+  row.style.display = isHidden ? 'table-row' : 'none';
+
+  if (icon) {
+    icon.textContent = isHidden ? 'expand_more' : 'chevron_right';
+  }
+
+  if (isHidden) {
+    expandedRows.add(idPedido);
+  } else {
+    expandedRows.delete(idPedido);
+  }
+}
+
+function renderizarPedidos(pedidos) {
+  const tbody = document.getElementById('tabla-pedidos');
+
+  if (!pedidos.length) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="8" class="text-center py-10 text-slate-400">
+          No hay pedidos registrados en este periodo.
+        </td>
+      </tr>
+    `;
+    calcularStats([]);
+    return;
+  }
+
+  tbody.innerHTML = '';
+
+  pedidos.forEach(pedido => {
+    const id = pedido.id_pedido;
+    const estado = pedido.estado || `Estado #${pedido.id_estado}`;
+
+    const fila = `
+      <tr class="pedido-row hover:bg-primary/5 transition-colors" onclick="toggleDetalle(${id})">
+        <td class="py-3 text-center">
+          <span id="icon-${id}" class="material-symbols-outlined text-primary">chevron_right</span>
+        </td>
+
+        <td class="py-3 font-mono text-sm font-semibold">#${id}</td>
+
+        <td class="py-3">${escapeHtml(pedido.cliente || `Cliente ${pedido.id_cliente}`)}</td>
+
+        <td class="py-3">${escapeHtml(formatDate(pedido.fecha_pedido))}</td>
+
+        <td class="py-3">${escapeHtml(formatDate(pedido.fecha_entrega))}</td>
+
+        <td class="py-3">
+          <span class="badge ${getEstadoBadgeClass(estado)}">
+            ${escapeHtml(estado)}
+          </span>
+        </td>
+
+        <td class="py-3 text-right font-bold text-primary">${formatMoney(pedido.total)}</td>
+
+        <td class="py-3 text-right" onclick="event.stopPropagation()">
+          <button onclick="abrirReportePedido(${id})"
+                  class="text-primary hover:bg-primary/10 p-2 rounded transition-colors"
+                  title="Generar PDF de este pedido">
+            <span class="material-symbols-outlined">picture_as_pdf</span>
+          </button>
+        </td>
+      </tr>
+    `;
+
+    tbody.insertAdjacentHTML('beforeend', fila);
+    tbody.insertAdjacentHTML('beforeend', renderizarDetallePedido(pedido));
+  });
+
+  calcularStats(pedidos);
+}
+
+async function cargarYRenderizar() {
+  const tbody = document.getElementById('tabla-pedidos');
+
+  tbody.innerHTML = `
+    <tr>
+      <td colspan="8" class="text-center py-10">
+        <div class="loading-spinner"></div>
+        <p class="text-slate-400 mt-2">Cargando pedidos...</p>
+      </td>
+    </tr>
+  `;
+
+  try {
+    const pedidos = await listarPedidos();
+
+    pedidosPeriodo = pedidos.filter(estaEnPeriodo);
+
+    renderizarPedidos(pedidosPeriodo);
+  } catch (e) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="8" class="text-center py-10 text-red-500">
+          Error al cargar pedidos: ${escapeHtml(e.message)}
+        </td>
+      </tr>
+    `;
+  }
+}
+
+function abrirReporteGeneral() {
+  if (!fechaInicio || !fechaFin) {
+    alert('No se especificó el periodo.');
+    return;
+  }
+
+  window.open(`${REPORTES_BASE}/pedidos?fecha_inicio=${fechaInicio}&fecha_fin=${fechaFin}`, '_blank');
+}
+
+function abrirReportePedido(idPedido) {
+  window.open(`${REPORTES_BASE}/pedido/${idPedido}`, '_blank');
+}
+
+cargarYRenderizar();
+</script>
+</body>
+</html>

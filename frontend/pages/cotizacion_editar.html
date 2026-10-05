@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Cotización - Nonna</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: { "primary": "#5d1927", "brand-pink": "#FEBDC6", "background-light": "#f8f6f6", "background-dark": "#1f1316" },
+                    fontFamily: { "display": ["Montserrat", "sans-serif"] },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        body { background-color: #FEBDC6; font-family: 'Montserrat', sans-serif; }
+        .modal-mensaje { transition: opacity 0.3s ease, visibility 0.3s ease; }
+        .detalle-item {
+            transition: all 0.2s ease;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 flex items-center justify-center">
+    <div class="w-full max-w-5xl bg-white rounded-2xl shadow-xl overflow-hidden my-4">
+        <div class="p-6 border-b border-primary/10 flex justify-between items-center">
+            <div>
+                <h1 class="text-2xl font-bold text-primary">Editar Cotización</h1>
+                <p class="text-slate-500 text-sm">Modifica el envío y los productos de la cotización</p>
+            </div>
+            <a href="cotizaciones.html" class="text-primary hover:bg-primary/10 p-2 rounded-full transition">
+                <span class="material-symbols-outlined">close</span>
+            </a>
+        </div>
+        <div class="p-6">
+            <form id="form-cotizacion" class="space-y-6">
+                <!-- ID Cotización (no editable) -->
+                <div>
+                    <label class="block text-sm font-bold text-primary mb-1">ID Cotización</label>
+                    <input id="id_cotizacion" type="text" class="w-full p-3 bg-slate-100 border border-primary/20 rounded-xl text-slate-500" readonly>
+                </div>
+
+                <!-- Estado de la cotización -->
+                <div>
+                    <label class="block text-sm font-bold text-primary mb-1">Estado *</label>
+                    <select id="id_estado" class="w-full p-3 border border-primary/20 rounded-xl focus:ring-primary" required>
+                        <option value="">Cargando estados...</option>
+                    </select>
+                </div>
+
+                <!-- Precio Envío -->
+                <div>
+                    <label class="block text-sm font-bold text-primary mb-1">Precio Envío</label>
+                    <input type="number" step="0.01" id="precio_envio" class="w-full p-3 border border-primary/20 rounded-xl" placeholder="0.00">
+                </div>
+
+                <!-- Lista de productos (detalles) dinámica -->
+                <div>
+                    <div class="flex justify-between items-center mb-3">
+                        <label class="block text-sm font-bold text-primary">Productos (Detalles) *</label>
+                        <button type="button" id="btn-agregar-detalle" class="text-sm bg-primary/10 text-primary px-3 py-1 rounded-full flex items-center gap-1 hover:bg-primary/20 transition">
+                            <span class="material-symbols-outlined text-sm">add</span> Agregar producto
+                        </button>
+                    </div>
+                    <div id="detalles-container" class="space-y-3">
+                        <div class="text-center text-slate-400 py-4">Cargando productos...</div>
+                    </div>
+                </div>
+
+                <!-- Botones -->
+                <div class="flex gap-4 pt-4">
+                    <button type="submit" id="btn-submit" class="flex-1 bg-primary text-white font-bold py-3 rounded-xl hover:bg-primary/90 transition flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined">save</span>
+                        Actualizar Cotización
+                    </button>
+                    <a href="cotizaciones.html" class="flex-1 border-2 border-primary text-primary font-bold py-3 rounded-xl hover:bg-primary/5 text-center">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODALES -->
+    <div id="modal-exito" class="fixed inset-0 flex items-center justify-center z-50 hidden modal-mensaje">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+        <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 text-center shadow-2xl">
+            <span class="material-symbols-outlined text-green-600 text-5xl mb-2">check_circle</span>
+            <h3 class="text-xl font-bold text-slate-900">¡Cotización actualizada!</h3>
+            <p class="text-slate-500 mt-2">Los cambios se guardaron correctamente.</p>
+            <button id="btn-cerrar-exito" class="mt-6 w-full bg-primary text-white py-2 rounded-xl font-bold">Continuar</button>
+        </div>
+    </div>
+    <div id="modal-error" class="fixed inset-0 flex items-center justify-center z-50 hidden modal-mensaje">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+        <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 text-center shadow-2xl">
+            <span class="material-symbols-outlined text-red-600 text-5xl mb-2">error</span>
+            <h3 class="text-xl font-bold text-slate-900">Error</h3>
+            <p id="error-mensaje" class="text-slate-500 mt-2"></p>
+            <button id="btn-cerrar-error" class="mt-6 w-full bg-primary text-white py-2 rounded-xl font-bold">Aceptar</button>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://127.0.0.1:8000/api';
+        const TOKEN = localStorage.token;
+        if (!TOKEN) {
+            alert('No hay sesión activa.');
+            window.location.href = '/index.html';
+        }
+
+        function getHeaders() {
+            return { 'accept': 'application/json', 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' };
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const id_cotizacion = urlParams.get('id_cotizacion');
+        if (!id_cotizacion) {
+            alert('No se especificó la cotización a editar');
+            window.location.href = 'cotizaciones.html';
+        }
+
+        let listaEstados = [];
+        let detallesActuales = [];
+        let productoOpciones = [];
+
+        // Calcular y mostrar precio total
+        function calcularYMostrarTotal() {
+            const envioInput = document.getElementById('precio_envio');
+            let precioEnvio = 0;
+            if (envioInput) {
+                precioEnvio = parseFloat(envioInput.value) || 0;
+            }
+            
+            let subtotalProductos = 0;
+            for (let detalle of detallesActuales) {
+                const cantidad = detalle.cantidad || 0;
+                const precioDisenio = detalle.precio_disenio || 0;
+                subtotalProductos += cantidad * precioDisenio;
+            }
+            
+            const total = subtotalProductos + precioEnvio;
+            const displayElement = document.getElementById('precio_total_display');
+            if (displayElement) {
+                displayElement.textContent = `$${total.toFixed(2)}`;
+                // Formato con separador de miles opcional
+                const formateado = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(total);
+                displayElement.textContent = formateado;
+            }
+        }
+
+        function mostrarExito(callback) {
+            const modal = document.getElementById('modal-exito');
+            modal.classList.remove('hidden');
+            document.getElementById('btn-cerrar-exito').onclick = () => {
+                modal.classList.add('hidden');
+                if (callback) callback();
+            };
+        }
+        
+        function mostrarError(mensaje) {
+            const modal = document.getElementById('modal-error');
+            document.getElementById('error-mensaje').innerText = mensaje;
+            modal.classList.remove('hidden');
+            document.getElementById('btn-cerrar-error').onclick = () => modal.classList.add('hidden');
+        }
+
+        async function cargarEstados() {
+            try {
+                const res = await fetch(`${API_BASE}/estado/`, { headers: getHeaders() });
+                if (!res.ok) throw new Error();
+                listaEstados = await res.json();
+                const select = document.getElementById('id_estado');
+                select.innerHTML = '<option value="">Seleccionar estado</option>';
+                listaEstados.forEach(e => {
+                    const opt = document.createElement('option');
+                    opt.value = e.id_estado;
+                    opt.textContent = e.descripcion;
+                    select.appendChild(opt);
+                });
+            } catch(e) {
+                listaEstados = [
+                    {id_estado:1, descripcion:'Pendiente'},
+                    {id_estado:2, descripcion:'Preparación'},
+                    {id_estado:3, descripcion:'Enviado'},
+                    {id_estado:4, descripcion:'Entregado'},
+                    {id_estado:5, descripcion:'Cancelado'},
+                    {id_estado:6, descripcion:'Cotización'}
+                ];
+                const select = document.getElementById('id_estado');
+                select.innerHTML = '<option value="">Seleccionar estado</option>';
+                listaEstados.forEach(e => {
+                    const opt = document.createElement('option');
+                    opt.value = e.id_estado;
+                    opt.textContent = e.descripcion;
+                    select.appendChild(opt);
+                });
+            }
+        }
+
+        async function cargarProductos() {
+            try {
+                const res = await fetch(`${API_BASE}/producto/`, { headers: getHeaders() });
+                if (!res.ok) throw new Error('Error cargando productos');
+                productoOpciones = await res.json();
+            } catch (error) {
+                console.error('No se pudo obtener lista de productos', error);
+                productoOpciones = [];
+            }
+        }
+
+        async function cargarCotizacion() {
+            try {
+                const res = await fetch(`${API_BASE}/cotizacion/${id_cotizacion}`, { headers: getHeaders() });
+                if (!res.ok) throw new Error(`Error ${res.status} al cargar cotización`);
+                const data = await res.json();
+                
+                document.getElementById('id_cotizacion').value = data.id_cotizacion;
+                document.getElementById('precio_envio').value = data.precio_envio || 0;
+                
+                if (data.id_estado) {
+                    document.getElementById('id_estado').value = data.id_estado;
+                }
+                
+                if (data.detalles && Array.isArray(data.detalles)) {
+                    detallesActuales = data.detalles.map(d => ({
+                        id_producto: d.id_producto,
+                        cantidad: d.cantidad,
+                        precio_disenio: d.precio_disenio || 0
+                    }));
+                } else {
+                    detallesActuales = [];
+                }
+                
+                renderizarDetalles();
+                calcularYMostrarTotal();
+                
+            } catch (error) {
+                mostrarError('Error al cargar la cotización: ' + error.message);
+                setTimeout(() => window.location.href = 'cotizaciones.html', 2000);
+            }
+        }
+
+        // Crear input cantidad SIN validación agresiva
+        function crearInputCantidad(valorInicial, idx) {
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.min = 1;
+            input.step = 1;
+            input.value = valorInicial;
+            input.className = 'w-full p-2 border border-primary/20 rounded-lg text-sm focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition';
+            
+            // SOLO cuando el usuario termina de editar (blur) se valida y actualiza
+            input.addEventListener('blur', (e) => {
+                let val = parseInt(e.target.value);
+                if (isNaN(val) || val < 1) {
+                    val = 1;
+                }
+                detallesActuales[idx].cantidad = val;
+                e.target.value = val;
+                calcularYMostrarTotal();
+            });
+            
+            // En input SOLO actualizamos el modelo sin forzar ni cambiar el valor visual
+            input.addEventListener('input', (e) => {
+                let val = e.target.value;
+                if (val === '' || val === '-') {
+                    // Permitir vacío temporalmente mientras escribe
+                    return;
+                }
+                let numVal = parseInt(val);
+                if (!isNaN(numVal) && numVal >= 1) {
+                    detallesActuales[idx].cantidad = numVal;
+                    calcularYMostrarTotal();
+                }
+            });
+            
+            return input;
+        }
+
+        function renderizarDetalles() {
+            const container = document.getElementById('detalles-container');
+            if (!container) return;
+            
+            if (!detallesActuales.length) {
+                container.innerHTML = `<div class="text-center text-slate-400 py-4 border border-dashed rounded-xl">No hay productos agregados. Presiona "Agregar producto"</div>`;
+                calcularYMostrarTotal();
+                return;
+            }
+            
+            container.innerHTML = '';
+            
+            detallesActuales.forEach((detalle, idx) => {
+                const div = document.createElement('div');
+                div.className = 'detalle-item bg-slate-50 p-4 rounded-xl border border-primary/10 relative';
+                div.setAttribute('data-index', idx);
+                
+                // Cabecera
+                const headerDiv = document.createElement('div');
+                headerDiv.className = 'flex justify-between items-center mb-2';
+                const titleSpan = document.createElement('span');
+                titleSpan.className = 'text-xs font-semibold text-primary/70';
+                titleSpan.innerText = `Producto #${idx+1}`;
+                const deleteBtn = document.createElement('button');
+                deleteBtn.type = 'button';
+                deleteBtn.className = 'text-red-500 hover:text-red-700 text-sm flex items-center gap-1 transition';
+                deleteBtn.innerHTML = '<span class="material-symbols-outlined text-sm">delete</span> Eliminar';
+                deleteBtn.onclick = () => eliminarDetalle(idx);
+                headerDiv.appendChild(titleSpan);
+                headerDiv.appendChild(deleteBtn);
+                
+                // Select producto
+                const productDiv = document.createElement('div');
+                productDiv.className = 'mb-3';
+                const productLabel = document.createElement('label');
+                productLabel.className = 'block text-xs font-bold text-slate-600 mb-1';
+                productLabel.innerText = 'Producto *';
+                const productSelect = document.createElement('select');
+                productSelect.className = 'w-full p-2 border border-primary/20 rounded-lg text-sm bg-white focus:ring-2 focus:ring-primary/30';
+                productSelect.required = true;
+                
+                if (productoOpciones.length === 0) {
+                    const opt = document.createElement('option');
+                    opt.value = '';
+                    opt.textContent = 'Cargando productos...';
+                    productSelect.appendChild(opt);
+                } else {
+                    productoOpciones.forEach(prod => {
+                        const opt = document.createElement('option');
+                        opt.value = prod.id_producto;
+                        opt.textContent = `${prod.descripcion}`;
+                        if (prod.id_producto === detalle.id_producto) opt.selected = true;
+                        productSelect.appendChild(opt);
+                    });
+                }
+                productSelect.addEventListener('change', (e) => {
+                    const newId = parseInt(e.target.value);
+                    if (!isNaN(newId)) {
+                        detallesActuales[idx].id_producto = newId;
+                    }
+                });
+                productDiv.appendChild(productLabel);
+                productDiv.appendChild(productSelect);
+                
+                // Cantidad - Input mejorado
+                const cantDiv = document.createElement('div');
+                cantDiv.className = 'mb-3';
+                const cantLabel = document.createElement('label');
+                cantLabel.className = 'block text-xs font-bold text-slate-600 mb-1';
+                cantLabel.innerText = 'Cantidad *';
+                const cantInput = crearInputCantidad(detalle.cantidad, idx);
+                cantDiv.appendChild(cantLabel);
+                cantDiv.appendChild(cantInput);
+                
+                // Precio Diseño
+                const precioDiv = document.createElement('div');
+                precioDiv.className = 'mb-1';
+                const precioLabel = document.createElement('label');
+                precioLabel.className = 'block text-xs font-bold text-slate-600 mb-1';
+                precioLabel.innerText = 'Precio Diseño (por unidad)';
+                const precioInput = document.createElement('input');
+                precioInput.type = 'number';
+                precioInput.step = 0.01;
+                precioInput.value = detalle.precio_disenio;
+                precioInput.className = 'w-full p-2 border border-primary/20 rounded-lg text-sm focus:ring-2 focus:ring-primary/30';
+                precioInput.addEventListener('blur', (e) => {
+                    let val = parseFloat(e.target.value);
+                    if (isNaN(val)) val = 0;
+                    detallesActuales[idx].precio_disenio = val;
+                    e.target.value = val.toFixed(2);
+                    calcularYMostrarTotal();
+                });
+                precioInput.addEventListener('input', (e) => {
+                    let val = parseFloat(e.target.value);
+                    if (!isNaN(val)) {
+                        detallesActuales[idx].precio_disenio = val;
+                        calcularYMostrarTotal();
+                    }
+                });
+                precioDiv.appendChild(precioLabel);
+                precioDiv.appendChild(precioInput);
+                
+                div.appendChild(headerDiv);
+                div.appendChild(productDiv);
+                div.appendChild(cantDiv);
+                div.appendChild(precioDiv);
+                container.appendChild(div);
+            });
+            
+            calcularYMostrarTotal();
+        }
+        
+        function eliminarDetalle(index) {
+            if (detallesActuales.length <= 1) {
+                mostrarError('La cotización debe tener al menos un producto.');
+                return;
+            }
+            detallesActuales.splice(index, 1);
+            renderizarDetalles();
+        }
+        
+        function agregarDetalle() {
+            detallesActuales.push({
+                id_producto: (productoOpciones.length > 0 ? productoOpciones[0].id_producto : 1),
+                cantidad: 1,
+                precio_disenio: 0
+            });
+            renderizarDetalles();
+        }
+        
+        async function actualizarCotizacion(payload) {
+            const res = await fetch(`${API_BASE}/cotizacion/${id_cotizacion}`, {
+                method: 'PUT',
+                headers: getHeaders(),
+                body: JSON.stringify(payload)
+            });
+            if (!res.ok) {
+                let errorMsg = 'Error al actualizar';
+                try {
+                    const errData = await res.json();
+                    if (errData.detail) {
+                        if (Array.isArray(errData.detail)) {
+                            errorMsg = errData.detail.map(d => d.msg || JSON.stringify(d)).join(', ');
+                        } else {
+                            errorMsg = errData.detail;
+                        }
+                    }
+                } catch(e) {}
+                throw new Error(errorMsg);
+            }
+            return res.json();
+        }
+        
+        // Submit
+        document.getElementById('form-cotizacion').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const id_estado_val = parseInt(document.getElementById('id_estado').value);
+            if (!id_estado_val || isNaN(id_estado_val)) {
+                mostrarError('Por favor seleccione un estado válido.');
+                return;
+            }
+            
+            const precio_envio_val = parseFloat(document.getElementById('precio_envio').value) || 0;
+            
+            if (!detallesActuales.length) {
+                mostrarError('Debe agregar al menos un producto (detalle) a la cotización.');
+                return;
+            }
+            
+            // Validación final antes de enviar
+            for (let i = 0; i < detallesActuales.length; i++) {
+                const det = detallesActuales[i];
+                if (!det.id_producto || isNaN(det.id_producto) || det.id_producto <= 0) {
+                    mostrarError(`Detalle #${i+1}: Debe seleccionar un producto válido.`);
+                    return;
+                }
+                if (!det.cantidad || isNaN(det.cantidad) || det.cantidad < 1) {
+                    mostrarError(`Detalle #${i+1}: La cantidad debe ser al menos 1.`);
+                    return;
+                }
+            }
+            
+            const payload = {
+                precio_envio: precio_envio_val,
+                detalles: detallesActuales.map(d => ({
+                    id_producto: d.id_producto,
+                    cantidad: d.cantidad,
+                    precio_disenio: d.precio_disenio || 0
+                }))
+            };
+            
+            const btn = document.getElementById('btn-submit');
+            const original = btn.innerHTML;
+            btn.innerHTML = '<span class="material-symbols-outlined animate-spin">progress_activity</span> Actualizando...';
+            btn.disabled = true;
+            
+            try {
+                await actualizarCotizacion(payload);
+                mostrarExito(() => window.location.href = 'cotizaciones.html');
+            } catch (error) {
+                mostrarError('Error al actualizar: ' + error.message);
+                btn.innerHTML = original;
+                btn.disabled = false;
+            }
+        });
+        
+        // Escuchar cambios en envío
+        function bindEventosGlobales() {
+            const envioInput = document.getElementById('precio_envio');
+            if (envioInput) {
+                envioInput.addEventListener('input', () => calcularYMostrarTotal());
+                envioInput.addEventListener('blur', () => calcularYMostrarTotal());
+            }
+        }
+        
+        async function init() {
+            await cargarProductos();
+            await cargarEstados();
+            await cargarCotizacion();
+            bindEventosGlobales();
+            const btnAgregar = document.getElementById('btn-agregar-detalle');
+            if (btnAgregar) {
+                btnAgregar.onclick = () => agregarDetalle();
+            }
+        }
+        
+        init();
+    </script>
+</body>
+</html>

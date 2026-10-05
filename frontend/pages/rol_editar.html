@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Editar Rol - Nonna DB</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+<script>
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: { "primary": "#5d1927", "accent-pink": "#FEBDC6" },
+                fontFamily: { "sans": ["Montserrat", "sans-serif"] },
+                borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px" },
+            },
+        },
+    }
+</script>
+<style>
+    body { font-family: "Montserrat", sans-serif; background-color: #FEBDC6; }
+    .modal-mensaje {
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+</style>
+</head>
+<body class="bg-[#FEBDC6] min-h-screen flex items-center justify-center p-4">
+<div class="bg-white w-full max-w-[700px] rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+
+    <header class="flex items-center justify-between border-b border-slate-100 px-10 py-6 bg-white">
+        <div class="flex items-center gap-4">
+            <div class="bg-primary/10 p-3 rounded-xl text-primary">
+                <span class="material-symbols-outlined text-3xl">admin_panel_settings</span>
+            </div>
+            <div>
+                <h1 class="text-slate-900 text-2xl font-extrabold tracking-tight">Editar Rol</h1>
+                <p class="text-slate-500 text-sm">Modifique la descripción del rol del sistema.</p>
+            </div>
+        </div>
+        <a href="roles.html" class="text-slate-400 hover:text-slate-600 transition-colors">
+            <span class="material-symbols-outlined">close</span>
+        </a>
+    </header>
+
+    <main class="flex-1 overflow-y-auto p-10 bg-slate-50/50">
+        <div class="max-w-xl mx-auto space-y-8">
+            <section class="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm">
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="material-symbols-outlined text-primary">badge</span>
+                    <h2 class="text-lg font-bold text-slate-900">Datos del Rol</h2>
+                </div>
+                <form id="form-editar" class="grid grid-cols-1 gap-6">
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-bold text-slate-700">Descripción del Rol *</label>
+                        <input id="descripcion" class="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="Ej. Administrador, Repartidor, Cajero..." required>
+                    </div>
+                </form>
+            </section>
+        </div>
+    </main>
+
+    <footer class="border-t border-slate-100 p-8 flex justify-end gap-4 bg-white">
+        <a href="roles.html" class="px-8 py-3 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-all">Cancelar</a>
+        <button type="submit" form="form-editar" id="btn-submit" class="px-10 py-3 rounded-xl bg-primary text-white font-bold hover:bg-primary/95 transition-all shadow-lg shadow-primary/30 flex items-center gap-2">
+            <span class="material-symbols-outlined">check_circle</span> Guardar Cambios
+        </button>
+    </footer>
+</div>
+
+<!-- MODALES CENTRALES -->
+<div id="modal-exito" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4"><span class="material-symbols-outlined text-green-600 text-5xl">check_circle</span></div>
+        <h3 id="exito-titulo" class="text-xl font-bold text-slate-900">¡Éxito!</h3>
+        <p id="exito-mensaje" class="text-slate-500 mt-2"></p>
+        <button id="btn-cerrar-exito" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Continuar</button>
+    </div>
+</div>
+
+<div id="modal-error" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4"><span class="material-symbols-outlined text-red-600 text-5xl">error</span></div>
+        <h3 class="text-xl font-bold text-slate-900">Error</h3>
+        <p id="error-mensaje" class="text-slate-500 mt-2"></p>
+        <button id="btn-cerrar-error" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Aceptar</button>
+    </div>
+</div>
+
+<div id="modal-warning" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4"><span class="material-symbols-outlined text-amber-600 text-5xl">warning</span></div>
+        <h3 class="text-xl font-bold text-slate-900">Aviso</h3>
+        <p id="warning-mensaje" class="text-slate-500 mt-2"></p>
+        <button id="btn-cerrar-warning" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Aceptar</button>
+    </div>
+</div>
+
+<script>
+    const API_BASE = 'http://127.0.0.1:8000/api';
+    const TOKEN = localStorage.token;
+
+    function getHeaders() {
+        return { 'accept': 'application/json', 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' };
+    }
+
+    function mostrarExito(mensaje, callback) {
+        const modal = document.getElementById('modal-exito');
+        document.getElementById('exito-titulo').innerText = '¡Éxito!';
+        document.getElementById('exito-mensaje').innerText = mensaje;
+        modal.classList.remove('hidden');
+        document.getElementById('btn-cerrar-exito').onclick = () => {
+            modal.classList.add('hidden');
+            if (callback) callback();
+        };
+    }
+
+    function mostrarError(mensaje) {
+        const modal = document.getElementById('modal-error');
+        document.getElementById('error-mensaje').innerText = mensaje;
+        modal.classList.remove('hidden');
+        document.getElementById('btn-cerrar-error').onclick = () => modal.classList.add('hidden');
+    }
+
+    function mostrarWarning(mensaje) {
+        const modal = document.getElementById('modal-warning');
+        document.getElementById('warning-mensaje').innerText = mensaje;
+        modal.classList.remove('hidden');
+        document.getElementById('btn-cerrar-warning').onclick = () => modal.classList.add('hidden');
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const rolId = urlParams.get('id');
+    if (!rolId) {
+        mostrarWarning('No se especificó qué rol editar.');
+        setTimeout(() => { window.location.href = 'roles.html'; }, 2000);
+    }
+
+    async function cargarRol() {
+        try {
+            const res = await fetch(`${API_BASE}/rol/${rolId}`, { headers: getHeaders() });
+            if (!res.ok) throw new Error(`Error ${res.status}`);
+            const rol = await res.json();
+            document.getElementById('descripcion').value = rol.descripcion || '';
+        } catch (error) {
+            mostrarError('Error al cargar el rol: ' + error.message);
+            setTimeout(() => { window.location.href = 'roles.html'; }, 2000);
+        }
+    }
+
+    async function actualizarRol(event) {
+        event.preventDefault();
+        const descripcion = document.getElementById('descripcion').value.trim();
+        if (!descripcion) {
+            mostrarWarning('La descripción del rol es obligatoria.');
+            return;
+        }
+
+        const submitBtn = document.getElementById('btn-submit');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<span class="material-symbols-outlined animate-spin text-lg">progress_activity</span> Guardando...';
+        submitBtn.disabled = true;
+
+        try {
+            const res = await fetch(`${API_BASE}/rol/${rolId}`, { method: 'PUT', headers: getHeaders(), body: JSON.stringify({ descripcion }) });
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.detail || 'Error al actualizar el rol');
+            }
+            mostrarExito(`Rol "${descripcion}" actualizado correctamente.`, () => {
+                window.location.href = 'roles.html';
+            });
+        } catch (error) {
+            let errorMsg = error.message;
+            if (errorMsg.includes('duplicate') || errorMsg.toLowerCase().includes('unique')) {
+                errorMsg = 'Ya existe un rol con esa descripción. Elija otro nombre.';
+            }
+            mostrarError(`Error: ${errorMsg}`);
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
+    }
+
+    document.getElementById('form-editar').addEventListener('submit', actualizarRol);
+    cargarRol();
+</script>
+</body>
+</html>

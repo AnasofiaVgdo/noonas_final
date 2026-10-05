@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Nonna - Gestión de Usuarios</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+<script>
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: {
+                    primary: "#5D1927",
+                    "background-light": "#FEBDC6",
+                    "background-dark": "#1a070a",
+                },
+                fontFamily: {
+                    display: ["Plus Jakarta Sans", "sans-serif"],
+                },
+                borderRadius: { DEFAULT: "0.75rem" },
+            },
+        },
+    };
+</script>
+<style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #FEBDC6; }
+    .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        vertical-align: middle;
+    }
+</style>
+</head>
+<body class="min-h-screen bg-background-light dark:bg-background-dark transition-colors duration-300">
+
+<!-- Top Navigation Bar -->
+<header class="w-full bg-[#f3dfe0] dark:bg-slate-900 border-b border-primary/10 px-6 py-4 flex items-center justify-between sticky top-0 z-50">
+    <div class="flex items-center gap-6">
+        <div class="flex items-center gap-3">
+            <div class="bg-primary p-2 rounded-lg text-white">
+                <span class="material-symbols-outlined block text-2xl">bakery_dining</span>
+            </div>
+            <h1 class="text-primary text-xl font-bold tracking-tight">Nonna</h1>
+        </div>
+        <div class="h-8 w-[1px] bg-primary/20"></div>
+        <a href="menu.html" class="flex items-center gap-2 text-primary hover:bg-primary/10 px-4 py-2 rounded-lg transition-colors duration-200">
+            <span class="material-symbols-outlined">arrow_back</span>
+            <span class="text-sm font-bold leading-normal">Menú de CRUDs</span>
+        </a>
+    </div>
+    <div class="flex items-center gap-4">
+        <div class="flex items-center gap-3 pl-4 border-l border-slate-200 dark:border-slate-700">
+            <div class="text-right hidden sm:block">
+                <p id="textoUsuario" class="text-sm font-semibold text-slate-900 dark:text-slate-100">Nombre de usuario</p>
+                <p id="textoRol" class="text-xs text-slate-500">Rol</p>
+            </div>
+        </div>
+        <button id="botonCerrarSesion" class="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all duration-300 shadow-md hover:shadow-lg">
+            <span class="material-symbols-outlined text-xl">logout</span>
+            <span class="hidden sm:inline text-sm font-medium">Cerrar Sesión</span>
+        </button>
+    </div>
+</header>
+<script>
+    document.getElementById("textoUsuario").innerText = localStorage.getItem("usuario") || "Invitado";
+    document.getElementById("textoRol").innerText = localStorage.getItem("rol") || "Sin rol";
+    const botonCerrarSesion = document.getElementById("botonCerrarSesion");
+    botonCerrarSesion.addEventListener("click", function () {
+        localStorage.clear();
+        window.location.href = "/index.html";
+    });
+</script>
+
+<main class="max-w-7xl mx-auto px-6 py-10">
+    <div class="mb-10">
+        <h1 class="text-4xl font-display font-bold text-primary dark:text-pink-100 tracking-tight">Gestión de Usuarios</h1>
+        <p class="text-primary/70 dark:text-pink-200/60 mt-2">Administración de acceso y perfiles de usuario del sistema.</p>
+    </div>
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div class="relative flex-1 max-w-lg">
+            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-primary/40">search</span>
+            <input id="buscador" class="w-full pl-10 pr-4 py-3 bg-white dark:bg-zinc-900 border-none rounded-xl shadow-sm focus:ring-2 focus:ring-primary dark:text-white placeholder:text-gray-400 transition-all" placeholder="Buscar usuario...">
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="usuario_nuevo.html" class="bg-primary hover:bg-opacity-90 text-white px-6 py-3 rounded-xl flex items-center gap-2 shadow-lg shadow-primary/20 transition-all active:scale-95">
+                <span class="material-symbols-outlined">add</span>
+                <span class="font-semibold">Nuevo Usuario</span>
+            </a>
+        </div>
+    </div>
+    <div class="bg-white dark:bg-zinc-900 rounded-2xl shadow-xl overflow-hidden border border-white/20 dark:border-zinc-800">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-50 dark:bg-zinc-800/50 border-b border-gray-100 dark:border-zinc-800">
+                        <th class="px-6 py-4 text-xs text-primary dark:text-pink-200 uppercase tracking-wider font-bold">Nombre</th>
+                        <th class="px-6 py-4 text-xs text-primary dark:text-pink-200 uppercase tracking-wider font-bold">Rol</th>
+                        <th class="px-6 py-4 text-xs text-primary dark:text-pink-200 uppercase tracking-wider font-bold text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-usuarios" class="divide-y divide-gray-100 dark:divide-zinc-800">
+                    <tr><td colspan="3" class="text-center py-10 text-primary/50">Cargando usuarios...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="px-6 py-4 bg-gray-50 dark:bg-zinc-800/30 border-t border-gray-100 dark:border-zinc-800 flex items-center justify-between">
+            <span id="total-registros" class="text-sm text-gray-500 dark:text-zinc-500">Cargando...</span>
+        </div>
+    </div>
+</main>
+
+<script>
+    const API_BASE = 'http://127.0.0.1:8000/api';
+    const TOKEN = localStorage.token;
+
+    function getHeaders() {
+        return { 'accept': 'application/json', 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' };
+    }
+
+    async function listarUsuarios() {
+        const res = await fetch(`${API_BASE}/usuario/`, { headers: getHeaders() });
+        if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
+        return res.json();
+    }
+
+    async function eliminarUsuario(id) {
+        const res = await fetch(`${API_BASE}/usuario/${id}`, { method: 'DELETE', headers: getHeaders() });
+        if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.detail || 'Error al eliminar');
+        }
+        return res.json();
+    }
+
+    let todosUsuarios = [];
+
+    function renderizarTabla(usuarios) {
+        const tbody = document.getElementById('tabla-usuarios');
+        if (!usuarios.length) {
+            tbody.innerHTML = `<tr><td colspan="3" class="text-center py-10 text-primary/50">No hay usuarios. ¡Crea el primero!</td></tr>`;
+            document.getElementById('total-registros').innerText = 'Mostrando 0 usuarios';
+            return;
+        }
+        tbody.innerHTML = '';
+        usuarios.forEach(usr => {
+            const fila = `
+                <tr class="hover:bg-gray-50 dark:hover:bg-zinc-800/30 transition-colors">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center gap-3">
+                            <div class="h-8 w-8 rounded-full bg-pink-100 dark:bg-zinc-800 flex items-center justify-center text-primary dark:text-pink-200 text-xs font-bold">
+                                ${escapeHtml((usr.nombre || '?').charAt(0).toUpperCase())}
+                            </div>
+                            <span class="text-sm font-semibold text-gray-900 dark:text-zinc-100">${escapeHtml(usr.nombre)}</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-pink-100 text-primary">${escapeHtml(usr.rol || `ID: ${usr.id_rol}`)}</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                        <div class="flex justify-center gap-2">
+                            <a href="usuario_editar.html?nombre=${encodeURIComponent(usr.nombre)}" class="p-2 text-primary/60 hover:text-primary hover:bg-primary/10 rounded-lg transition-all" title="Editar">
+                                <span class="material-symbols-outlined text-xl">edit</span>
+                            </a>
+                            <a href="usuario_eliminar.html?id=${usr.id_usuario}&nombre=${encodeURIComponent(usr.nombre)}" class="p-2 text-primary/40 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all" title="Eliminar">
+                                <span class="material-symbols-outlined text-xl">delete</span>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            tbody.insertAdjacentHTML('beforeend', fila);
+        });
+        document.getElementById('total-registros').innerText = `Mostrando ${usuarios.length} usuarios`;
+    }
+
+    async function cargarUsuarios() {
+        const tbody = document.getElementById('tabla-usuarios');
+        tbody.innerHTML = `<tr><td colspan="3" class="text-center py-10 text-primary/50">Cargando...</td></tr>`;
+        try {
+            todosUsuarios = await listarUsuarios();
+            renderizarTabla(todosUsuarios);
+        } catch (error) {
+            console.error(error);
+            let mensaje = error.message;
+            if (mensaje.includes('401')) mensaje = 'Token inválido o expirado.';
+            else if (mensaje.includes('Failed to fetch')) mensaje = 'Error de CORS o conexión.';
+            tbody.innerHTML = `<tr><td colspan="3" class="text-center py-10 text-red-500">Error: ${mensaje}</td></tr>`;
+        }
+    }
+
+    const buscador = document.getElementById('buscador');
+    if (buscador) {
+        buscador.addEventListener('input', (e) => {
+            const texto = e.target.value.toLowerCase();
+            if (!texto.trim()) return renderizarTabla(todosUsuarios);
+            const filtrados = todosUsuarios.filter(u => u.nombre?.toLowerCase().includes(texto));
+            renderizarTabla(filtrados);
+        });
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : (m === '<' ? '&lt;' : '&gt;'));
+    }
+
+    cargarUsuarios();
+</script>
+</body>
+</html>

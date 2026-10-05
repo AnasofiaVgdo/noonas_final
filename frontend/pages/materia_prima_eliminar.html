@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+<script>
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: {
+                    "primary": "#5d1927",
+                    "accent": "#febdc6",
+                    "background-light": "#f8f6f6",
+                    "background-dark": "#1f1316",
+                },
+                fontFamily: { "display": ["Plus Jakarta Sans", "sans-serif"] },
+                borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+            },
+        },
+    }
+</script>
+<title>Eliminar Materia Prima - Nonna</title>
+<style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    .modal-mensaje { transition: opacity 0.3s ease, visibility 0.3s ease; }
+</style>
+</head>
+<body class="bg-accent min-h-screen flex items-center justify-center p-4">
+
+<!-- TARJETA PRINCIPAL -->
+<div class="fixed inset-0 bg-primary/20 backdrop-blur-sm flex items-center justify-center p-6">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-[520px] overflow-hidden">
+        <!-- Franja superior -->
+        <div class="h-2 w-full bg-primary"></div>
+
+        <div class="p-8 md:p-10 flex flex-col items-center text-center">
+            <!-- Ícono -->
+            <div class="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-6">
+                <span class="material-symbols-outlined text-primary text-5xl">warning</span>
+            </div>
+            <!-- Título -->
+            <h2 class="text-primary text-2xl md:text-3xl font-bold leading-tight mb-3">
+                ¿Eliminar esta materia prima?
+            </h2>
+            <p class="text-xs font-bold uppercase tracking-widest text-primary/40 mb-6">MÓDULO DE INVENTARIO</p>
+
+            <!-- Detalle del item -->
+            <div class="w-full bg-primary/5 rounded-lg p-4 mb-8 text-left border border-primary/10">
+                <span class="block text-[10px] font-bold text-primary/50 uppercase tracking-widest mb-1">Materia Prima</span>
+                <p id="nombre-materia" class="font-bold text-primary text-base mb-2">Cargando...</p>
+                <span class="block text-[10px] font-bold text-primary/50 uppercase tracking-widest mb-1">Stock Actual</span>
+                <p id="stock-materia" class="text-sm text-slate-700">--</p>
+            </div>
+
+            <!-- Advertencia -->
+            <p id="mensaje-peligro" class="text-slate-400 text-xs mb-8">Esta acción no se puede deshacer. El insumo será removido permanentemente de tu inventario.</p>
+
+            <!-- Botones -->
+            <div class="flex flex-col sm:flex-row gap-3 w-full">
+                <a id="cancelar-btn" href="materia_prima.html" class="flex-1 h-12 px-6 rounded-lg border-2 border-primary/20 bg-white text-primary font-bold text-sm hover:bg-primary/5 transition-colors flex items-center justify-center">
+                    Cancelar
+                </a>
+                <button id="btn-eliminar" class="flex-1 h-12 px-6 rounded-lg bg-primary text-white font-bold text-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2 shadow-lg shadow-primary/20">
+                    <span class="material-symbols-outlined text-xl">delete</span>
+                    Eliminar
+                </button>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="bg-primary/5 py-3 px-8 text-center border-t border-primary/10">
+            <p class="text-[10px] text-primary/40 uppercase font-bold tracking-[0.2em]">Nonna Administrative Module</p>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL DE CONFIRMACIÓN -->
+<div id="modal-confirmacion" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4">
+            <span class="material-symbols-outlined text-amber-600 text-5xl">warning</span>
+        </div>
+        <h3 class="text-xl font-bold text-slate-900">Confirmar eliminación</h3>
+        <p class="text-slate-500 mt-2">¿Estás seguro de que deseas eliminar esta materia prima?<br>Esta acción no se puede deshacer.</p>
+        <div class="flex gap-3 mt-6">
+            <button id="btn-confirmar-eliminar" class="flex-1 bg-red-600 text-white font-bold py-2 px-4 rounded-xl hover:bg-red-700 transition-colors">Sí, eliminar</button>
+            <button id="btn-cancelar-confirmacion" class="flex-1 bg-gray-200 text-gray-800 font-bold py-2 px-4 rounded-xl hover:bg-gray-300 transition-colors">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL DE ÉXITO -->
+<div id="modal-exito" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4">
+            <span class="material-symbols-outlined text-green-600 text-5xl">check_circle</span>
+        </div>
+        <h3 class="text-xl font-bold text-slate-900">¡Eliminado!</h3>
+        <p class="text-slate-500 mt-2">La materia prima se ha eliminado correctamente.</p>
+        <button id="btn-cerrar-exito" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Continuar</button>
+    </div>
+</div>
+
+<!-- MODAL DE ERROR -->
+<div id="modal-error" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4">
+            <span class="material-symbols-outlined text-red-600 text-5xl">error</span>
+        </div>
+        <h3 class="text-xl font-bold text-slate-900">Error</h3>
+        <p id="error-mensaje" class="text-slate-500 mt-2"></p>
+        <button id="btn-cerrar-error" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Aceptar</button>
+    </div>
+</div>
+
+<script>
+    const API_BASE = 'http://127.0.0.1:8000/api';
+    const TOKEN = localStorage.token;
+
+    function getHeaders() {
+        return {
+            'accept': 'application/json',
+            'Authorization': `Bearer ${TOKEN}`,
+            'Content-Type': 'application/json'
+        };
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const materiaId = urlParams.get('id');
+    if (!materiaId) {
+        alert('No se especificó qué materia prima eliminar. Redirigiendo al listado.');
+        window.location.href = 'materia_prima.html';
+    }
+
+    function mostrarConfirmacion() {
+        document.getElementById('modal-confirmacion').classList.remove('hidden');
+    }
+    function ocultarConfirmacion() {
+        document.getElementById('modal-confirmacion').classList.add('hidden');
+    }
+    function mostrarExito(callback) {
+        const modal = document.getElementById('modal-exito');
+        modal.classList.remove('hidden');
+        const btn = document.getElementById('btn-cerrar-exito');
+        btn.onclick = () => {
+            modal.classList.add('hidden');
+            if (callback) callback();
+        };
+    }
+    function mostrarError(mensaje, callback) {
+        const modal = document.getElementById('modal-error');
+        document.getElementById('error-mensaje').innerText = mensaje;
+        modal.classList.remove('hidden');
+        const btn = document.getElementById('btn-cerrar-error');
+        btn.onclick = () => {
+            modal.classList.add('hidden');
+            if (callback) callback();
+        };
+    }
+
+    async function obtenerMateria(id) {
+        const res = await fetch(`${API_BASE}/materia_prima/${id}`, { headers: getHeaders() });
+        if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
+        return res.json();
+    }
+    async function eliminarMateria(id) {
+        const res = await fetch(`${API_BASE}/materia_prima/${id}`, {
+            method: 'DELETE',
+            headers: getHeaders()
+        });
+        if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.detail || 'Error al eliminar');
+        }
+        return res.json();
+    }
+
+    async function cargarDatos() {
+        try {
+            const materia = await obtenerMateria(materiaId);
+            const nombre = materia.descripcion || 'Sin nombre';
+            const stock = materia.stock_actual || 0;
+            let unidadTexto = '';
+            if (materia.id_unidad) {
+                try {
+                    const unidadesRes = await fetch(`${API_BASE}/unidad_medida/`, { headers: getHeaders() });
+                    const unidades = await unidadesRes.json();
+                    const unidad = unidades.find(u => u.id_unidad === materia.id_unidad);
+                    if (unidad) unidadTexto = unidad.abreviatura || unidad.descripcion || '';
+                } catch(e) { console.warn(e); }
+            }
+            document.getElementById('nombre-materia').innerText = nombre;
+            document.getElementById('stock-materia').innerText = `${stock} ${unidadTexto}`;
+            document.getElementById('mensaje-peligro').innerHTML = `Esta acción no se puede deshacer. El insumo <span class="font-semibold text-primary">${escapeHtml(nombre)}</span> será removido permanentemente de tu inventario.`;
+        } catch (error) {
+            console.error(error);
+            mostrarError('Error al cargar los datos: ' + error.message, () => {
+                window.location.href = 'materia_prima.html';
+            });
+        }
+    }
+
+    async function realizarEliminacion() {
+        try {
+            await eliminarMateria(materiaId);
+            mostrarExito(() => {
+                window.location.href = 'materia_prima.html';
+            });
+        } catch (error) {
+            mostrarError('Error al eliminar: ' + error.message);
+        }
+    }
+
+    document.getElementById('btn-eliminar').addEventListener('click', mostrarConfirmacion);
+    document.getElementById('btn-confirmar-eliminar').addEventListener('click', () => {
+        ocultarConfirmacion();
+        realizarEliminacion();
+    });
+    document.getElementById('btn-cancelar-confirmacion').addEventListener('click', ocultarConfirmacion);
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    cargarDatos();
+</script>
+</body>
+</html>

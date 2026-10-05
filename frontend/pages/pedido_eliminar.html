@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+<script>
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: {
+                    "primary": "#5d1927",
+                    "accent": "#febdc6",
+                    "background-light": "#f8f6f6",
+                    "background-dark": "#1f1316",
+                },
+                fontFamily: { "display": ["Plus Jakarta Sans", "sans-serif"] },
+                borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+            },
+        },
+    }
+</script>
+<title>Eliminar Pedido - Nonna</title>
+<style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    .modal-mensaje { transition: opacity 0.3s ease, visibility 0.3s ease; }
+</style>
+</head>
+<body class="bg-accent min-h-screen flex items-center justify-center p-4">
+
+<!-- TARJETA PRINCIPAL -->
+<div class="fixed inset-0 bg-primary/20 backdrop-blur-sm flex items-center justify-center p-6">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-[520px] overflow-hidden">
+        <!-- Franja superior -->
+        <div class="h-2 w-full bg-primary"></div>
+
+        <div class="p-8 md:p-10 flex flex-col items-center text-center">
+            <!-- Ícono -->
+            <div class="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-6">
+                <span class="material-symbols-outlined text-primary text-5xl">warning</span>
+            </div>
+            <!-- Título -->
+            <h2 class="text-primary text-2xl md:text-3xl font-bold leading-tight mb-3">
+                ¿Eliminar este pedido?
+            </h2>
+            <p class="text-xs font-bold uppercase tracking-widest text-primary/40 mb-6">MÓDULO DE PEDIDOS</p>
+
+            <!-- Detalle del pedido -->
+            <div class="w-full bg-primary/5 rounded-lg p-4 mb-8 text-left border border-primary/10 flex flex-col gap-3">
+                <div>
+                    <span class="block text-[10px] font-bold text-primary/50 uppercase tracking-widest mb-1">ID del Pedido</span>
+                    <span id="pedido-id" class="block font-bold text-primary text-base">-</span>
+                </div>
+                <div>
+                    <span class="block text-[10px] font-bold text-primary/50 uppercase tracking-widest mb-1">Cliente</span>
+                    <span id="cliente-nombre" class="block text-sm text-slate-700">-</span>
+                </div>
+            </div>
+
+            <!-- Advertencia -->
+            <p class="text-slate-400 text-xs mb-8">Al eliminar el pedido se borrará todo el historial relacionado de forma permanente. Esta acción no se puede deshacer.</p>
+
+            <!-- Botones -->
+            <div class="flex flex-col sm:flex-row gap-3 w-full">
+                <a href="pedidos.html" class="flex-1 h-12 px-6 rounded-lg border-2 border-primary/20 bg-white text-primary font-bold text-sm hover:bg-primary/5 transition-colors flex items-center justify-center">
+                    Mantener Pedido
+                </a>
+                <button id="btn-eliminar" class="flex-1 h-12 px-6 rounded-lg bg-primary text-white font-bold text-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2 shadow-lg shadow-primary/20">
+                    <span class="material-symbols-outlined text-xl">delete</span>
+                    Confirmar Eliminación
+                </button>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="bg-primary/5 py-3 px-8 text-center border-t border-primary/10">
+            <p class="text-[10px] text-primary/40 uppercase font-bold tracking-[0.2em]">Nonna Administrative Module</p>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL DE CONFIRMACIÓN -->
+<div id="modal-confirmacion" class="fixed inset-0 flex items-center justify-center z-[70] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4">
+            <span class="material-symbols-outlined text-amber-600 text-5xl">warning</span>
+        </div>
+        <h3 class="text-xl font-bold text-slate-900">Confirmar eliminación</h3>
+        <p class="text-slate-500 mt-2 mb-6">¿Estás absolutamente seguro? Esta acción es irreversible y eliminará todo el historial del pedido.</p>
+        <div class="flex gap-3">
+            <button id="btn-confirmar-cancelar" class="flex-1 px-4 py-2 border border-slate-200 rounded-xl text-slate-600 font-bold hover:bg-slate-50 transition-colors">Cancelar</button>
+            <button id="btn-confirmar-aceptar" class="flex-1 px-4 py-2 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition-colors">Eliminar</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL DE ÉXITO -->
+<div id="modal-exito" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4">
+            <span class="material-symbols-outlined text-green-600 text-5xl">check_circle</span>
+        </div>
+        <h3 class="text-xl font-bold text-slate-900">¡Pedido eliminado!</h3>
+        <p class="text-slate-500 mt-2">El pedido se ha eliminado correctamente.</p>
+        <button id="btn-cerrar-exito" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Continuar</button>
+    </div>
+</div>
+
+<!-- MODAL DE ERROR -->
+<div id="modal-error" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4">
+            <span class="material-symbols-outlined text-red-600 text-5xl">error</span>
+        </div>
+        <h3 class="text-xl font-bold text-slate-900">Error</h3>
+        <p id="error-mensaje" class="text-slate-500 mt-2"></p>
+        <button id="btn-cerrar-error" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Aceptar</button>
+    </div>
+</div>
+
+<script>
+    const API_BASE = 'http://127.0.0.1:8000/api';
+    const TOKEN = localStorage.token;
+    function getHeaders() { return { 'accept': 'application/json', 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' }; }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const pedidoId = urlParams.get('id');
+    if (!pedidoId) {
+        mostrarError('No se especificó qué pedido eliminar.', true);
+    }
+
+    function mostrarExito(callback) {
+        const modal = document.getElementById('modal-exito');
+        modal.classList.remove('hidden');
+        document.getElementById('btn-cerrar-exito').onclick = () => {
+            modal.classList.add('hidden');
+            if (callback) callback();
+        };
+    }
+
+    function mostrarError(mensaje, redirigir = false) {
+        const modal = document.getElementById('modal-error');
+        document.getElementById('error-mensaje').innerText = mensaje;
+        modal.classList.remove('hidden');
+        document.getElementById('btn-cerrar-error').onclick = () => {
+            modal.classList.add('hidden');
+            if (redirigir) window.location.href = 'pedidos.html';
+        };
+    }
+
+    function mostrarConfirmacion(onConfirm) {
+        const modal = document.getElementById('modal-confirmacion');
+        modal.classList.remove('hidden');
+        const aceptarBtn = document.getElementById('btn-confirmar-aceptar');
+        const cancelarBtn = document.getElementById('btn-confirmar-cancelar');
+        const cerrar = () => modal.classList.add('hidden');
+        const aceptarHandler = () => { cerrar(); if (onConfirm) onConfirm(); };
+        aceptarBtn.addEventListener('click', aceptarHandler);
+        cancelarBtn.addEventListener('click', cerrar);
+    }
+
+    async function cargarDatos() {
+        try {
+            const res = await fetch(`${API_BASE}/pedidos/${pedidoId}`, { headers: getHeaders() });
+            if (!res.ok) throw new Error();
+            const pedido = await res.json();
+            document.getElementById('pedido-id').innerText = pedido.id_pedido;
+            const clienteRes = await fetch(`${API_BASE}/cliente/${pedido.id_cliente}`, { headers: getHeaders() });
+            if (clienteRes.ok) {
+                const cliente = await clienteRes.json();
+                document.getElementById('cliente-nombre').innerText = `${cliente.nombre} ${cliente.apellido}`.trim();
+            } else {
+                document.getElementById('cliente-nombre').innerText = `Cliente ${pedido.id_cliente}`;
+            }
+        } catch(e) {
+            document.getElementById('cliente-nombre').innerText = 'Error al cargar';
+            mostrarError('No se pudo cargar la información del pedido.', true);
+        }
+    }
+
+    async function eliminarPedido() {
+        const btn = document.getElementById('btn-eliminar');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<span class="material-symbols-outlined animate-spin">progress_activity</span> Eliminando...';
+        btn.disabled = true;
+        try {
+            const res = await fetch(`${API_BASE}/pedidos/${pedidoId}`, { method: 'DELETE', headers: getHeaders() });
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.detail || 'Error al eliminar');
+            }
+            mostrarExito(() => { window.location.href = 'pedidos.html'; });
+        } catch (error) {
+            let msg = error.message;
+            if (msg.includes('foreign key') || msg.includes('referenced')) {
+                msg = 'No se puede eliminar este pedido porque tiene productos asociados o está referenciado en otras tablas.';
+            }
+            mostrarError('Error al eliminar: ' + msg);
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    }
+
+    document.getElementById('btn-eliminar').addEventListener('click', () => {
+        mostrarConfirmacion(() => { eliminarPedido(); });
+    });
+
+    cargarDatos();
+</script>
+</body>
+</html>

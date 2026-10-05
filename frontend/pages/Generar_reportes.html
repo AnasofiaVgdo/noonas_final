@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: {
+                    "primary": "#FEBDC6",
+                    "burgundy": "#4A0E0E",
+                    "background-light": "#FEBDC6",
+                    "background-dark": "#230f12",
+                },
+                fontFamily: {
+                    "display": ["Montserrat", "sans-serif"]
+                },
+                borderRadius: {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+                },
+            },
+        },
+    }
+</script>
+<title>Nonna - Generar Reportes</title>
+<style>
+    /* Modal animations */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-overlay.active {
+        display: flex;
+    }
+
+    .modal-content {
+        animation: modalFadeIn 0.3s ease-out;
+    }
+
+    @keyframes modalFadeIn {
+        from {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    /* Modal for compra ID */
+    .modal-compra-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-compra-overlay.active {
+        display: flex;
+    }
+
+    /* Loading spinner */
+    .loading-spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 2px solid #ffffff;
+        border-radius: 50%;
+        border-top-color: transparent;
+        animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Loading spinner for verification */
+    .loading-spinner-small {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 2px solid #4A0E0E;
+        border-radius: 50%;
+        border-top-color: transparent;
+        animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Toast notification */
+    .toast {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: #4A0E0E;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        z-index: 1100;
+        animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    /* Input error styling */
+    .input-error {
+        border-color: #dc2626 !important;
+        background-color: #fef2f2 !important;
+    }
+
+    .error-message {
+        color: #dc2626;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: none;
+    }
+
+    .error-message.active {
+        display: block;
+    }
+
+    /* Alert message styling */
+    .alert-message {
+        background-color: #fee2e2;
+        border-left: 4px solid #dc2626;
+        color: #991b1b;
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 16px;
+        font-size: 0.875rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .alert-message .material-symbols-outlined {
+        font-size: 20px;
+    }
+</style>
+</head>
+
+<body class="bg-background-light font-display text-slate-900 min-h-screen">
+<div class="layout-container flex h-full grow flex-col">
+    <!-- Top Navigation Bar Begins-->
+    <header class="w-full bg-[#f3dfe0] dark:bg-slate-900 border-b border-[#5d1927]/10 px-6 py-4 flex items-center justify-between sticky top-0 z-50">
+        <div class="flex items-center gap-6">
+            <div class="flex items-center gap-3">
+                <div class="bg-[#5d1927] p-2 rounded-lg text-white">
+                    <span class="material-symbols-outlined block text-2xl">bakery_dining</span>
+                </div>
+                <h1 class="text-[#5d1927] text-xl font-bold tracking-tight">Nonna</h1>
+            </div>
+            <div class="h-8 w-[1px] bg-[#5d1927]/20"></div>
+            <a href="menu.html" class="flex items-center gap-2 text-[#5d1927] hover:bg-[#5d1927]/10 px-4 py-2 rounded-lg transition-colors duration-200">
+                <span class="material-symbols-outlined">home</span>
+                <span class="text-sm font-bold leading-normal">Menú Principal</span>
+            </a>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="flex items-center gap-3 pl-4 border-l border-slate-200 dark:border-slate-700">
+                <div class="text-right hidden sm:block">
+                    <p id="textoUsuario" class="text-sm font-semibold text-slate-900 dark:text-slate-100">Nombre de usuario</p>
+                    <p id="textoRol" class="text-xs text-slate-500">Rol</p>
+                </div>
+            </div>
+            <!-- Botón de Cerrar Sesión -->
+            <button id="botonCerrarSesion" class="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all duration-300 shadow-md hover:shadow-lg">
+                <span class="material-symbols-outlined text-xl">logout</span>
+                <span class="hidden sm:inline text-sm font-medium">Cerrar Sesión</span>
+            </button>
+        </div>
+    </header>
+    <script>
+        document.getElementById("textoUsuario").innerText =
+            localStorage.getItem("usuario") || "Invitado";
+        document.getElementById("textoRol").innerText =
+            localStorage.getItem("rol") || "Sin rol";
+
+        const botonCerrarSesion = document.getElementById("botonCerrarSesion");
+        botonCerrarSesion.addEventListener("click", function () {
+            localStorage.clear();
+            window.location.href = "/index.html";
+        });
+    </script>
+    <!-- Top Navigation Bar Ends-->
+
+    <!-- Main Wrapper with Max Width -->
+    <div class="mx-auto w-full max-w-[1200px] px-6 py-8">
+
+        <!-- Page Title -->
+        <div class="mb-10">
+            <h1 class="text-burgundy text-6xl font-black tracking-tight mb-8">REPORTES</h1>
+            <div class="bg-burgundy w-full py-6 rounded-xl shadow-lg flex justify-center items-center">
+                <h2 class="text-white text-3xl font-bold tracking-wide">GENERAR REPORTES PDF</h2>
+            </div>
+        </div>
+
+        <!-- Report Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+            <!-- Ventas -->
+            <button onclick="showModal('ventas')"
+                    class="bg-white hover:bg-white/90 aspect-square rounded-2xl flex flex-col items-center justify-center p-8 gap-6 shadow-xl transition-all hover:scale-[1.02]">
+                <div class="bg-[#5d1927]/10 p-6 rounded-full">
+                    <span class="material-symbols-outlined text-[#5d1927] text-7xl">currency_exchange</span>
+                </div>
+                <span class="text-[#5d1927] text-2xl font-bold tracking-widest uppercase">Ventas</span>
+            </button>
+
+            <!-- Inventario -->
+            <button onclick="generateInventarioReport()"
+                    class="bg-white hover:bg-white/90 aspect-square rounded-2xl flex flex-col items-center justify-center p-8 gap-6 shadow-xl transition-all hover:scale-[1.02]">
+                <div class="bg-[#5d1927]/10 p-6 rounded-full">
+                    <span class="material-symbols-outlined text-[#5d1927] text-7xl">assignment</span>
+                </div>
+                <span class="text-[#5d1927] text-2xl font-bold tracking-widest uppercase">Inventario</span>
+            </button>
+
+            <!-- Compras -->
+            <button onclick="showModal('compras')"
+                    class="bg-white hover:bg-white/90 aspect-square rounded-2xl flex flex-col items-center justify-center p-8 gap-6 shadow-xl transition-all hover:scale-[1.02]">
+                <div class="bg-[#5d1927]/10 p-6 rounded-full">
+                    <span class="material-symbols-outlined text-[#5d1927] text-7xl">shopping_bag</span>
+                </div>
+                <span class="text-[#5d1927] text-2xl font-bold tracking-widest uppercase">Compras</span>
+            </button>
+
+            <!-- Pedidos -->
+            <button onclick="showModal('pedidos')"
+                    class="bg-white hover:bg-white/90 aspect-square rounded-2xl flex flex-col items-center justify-center p-8 gap-6 shadow-xl transition-all hover:scale-[1.02]">
+                <div class="bg-[#5d1927]/10 p-6 rounded-full">
+                    <span class="material-symbols-outlined text-[#5d1927] text-7xl">edit_note</span>
+                </div>
+                <span class="text-[#5d1927] text-2xl font-bold tracking-widest uppercase">Pedidos</span>
+            </button> 
+        </div>        
+
+        <!-- Footer Decorative Element -->
+        <div class="flex justify-center mt-20 opacity-20">
+   
+        </div>
+    </div>
+</div>
+
+<!-- Modal para seleccionar rango de fechas (Ventas, Compras, Pedidos) -->
+<div id="reportModal" class="modal-overlay">
+    <div class="bg-white rounded-2xl shadow-2xl modal-content max-w-md w-full mx-4">
+        <div class="bg-burgundy rounded-t-2xl px-6 py-4 flex justify-between items-center">
+            <h3 id="modalTitle" class="text-white text-2xl font-bold">Generar Reporte</h3>
+            <button onclick="closeModal()" class="text-white hover:opacity-80">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+
+        <div class="p-6">
+            <p class="text-gray-700 mb-4">Selecciona el rango de fechas para el reporte:</p>
+
+            <div class="mb-4">
+                <label class="block text-burgundy font-bold mb-2">Fecha de inicio:</label>
+                <input type="date" id="startDateInput"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-burgundy focus:ring-2 focus:ring-burgundy/50">
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-burgundy font-bold mb-2">Fecha de fin:</label>
+                <input type="date" id="endDateInput"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-burgundy focus:ring-2 focus:ring-burgundy/50">
+            </div>
+
+            <div class="flex gap-3">
+                <button onclick="generateReport()" id="generateBtn"
+                        class="flex-1 bg-burgundy text-white py-2 rounded-lg font-bold hover:opacity-90 transition-opacity">
+                    Generar Reporte
+                </button>
+                <button onclick="closeModal()"
+                        class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg font-bold hover:bg-gray-400 transition-colors">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal mejorado para ingresar ID de Compra -->
+<div id="compraModal" class="modal-compra-overlay">
+    <div class="bg-white rounded-2xl shadow-2xl modal-content max-w-md w-full mx-4">
+        <div class="bg-burgundy rounded-t-2xl px-6 py-4 flex justify-between items-center">
+            <h3 class="text-white text-2xl font-bold">Reporte de Compra</h3>
+            <button onclick="closeCompraModal()" class="text-white hover:opacity-80">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+
+        <div class="p-6">
+            <p class="text-gray-700 mb-4">Ingresa el ID de la compra para generar el reporte:</p>
+
+            <div class="mb-4">
+                <label class="block text-burgundy font-bold mb-2">ID de Compra:</label>
+                <input type="text" id="compraIdInput" placeholder="Ej: 1, 2, 3..."
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-burgundy focus:ring-2 focus:ring-burgundy/50 text-lg"
+                       autocomplete="off">
+                <div id="idErrorMessage" class="error-message"></div>
+            </div>
+
+            <!-- Contenedor para mensajes de alerta -->
+            <div id="compraAlertContainer"></div>
+
+            <div class="flex gap-3 mt-6">
+                <button onclick="generateCompraReport()" id="generateCompraBtn"
+                        class="flex-1 bg-burgundy text-white py-2 rounded-lg font-bold hover:opacity-90 transition-opacity">
+                    Generar Reporte
+                </button>
+                <button onclick="resetAndCloseCompraModal()"
+                        class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg font-bold hover:bg-gray-400 transition-colors">
+                    Cancelar
+                </button>
+            </div>
+            
+            <button onclick="resetCompraForm()" 
+                    id="resetCompraBtn"
+                    style="display: none;"
+                    class="w-full mt-3 bg-gray-100 text-gray-600 py-2 rounded-lg font-bold hover:bg-gray-200 transition-colors text-sm">
+                Intentar con otro ID
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal mejorado para ingresar ID de Pedido -->
+<div id="pedidoModal" class="modal-compra-overlay">
+    <div class="bg-white rounded-2xl shadow-2xl modal-content max-w-md w-full mx-4">
+        <div class="bg-burgundy rounded-t-2xl px-6 py-4 flex justify-between items-center">
+            <h3 class="text-white text-2xl font-bold">Reporte de Pedido</h3>
+            <button onclick="closePedidoModal()" class="text-white hover:opacity-80">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+
+        <div class="p-6">
+            <p class="text-gray-700 mb-4">Ingresa el ID del pedido para generar el reporte:</p>
+
+            <div class="mb-4">
+                <label class="block text-burgundy font-bold mb-2">ID de Pedido:</label>
+                <input type="text" id="pedidoIdInput" placeholder="Ej: 1, 2, 3..."
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-burgundy focus:ring-2 focus:ring-burgundy/50 text-lg"
+                       autocomplete="off">
+                <div id="pedidoIdErrorMessage" class="error-message"></div>
+            </div>
+
+            <!-- Contenedor para mensajes de alerta -->
+            <div id="pedidoAlertContainer"></div>
+
+            <div class="flex gap-3 mt-6">
+                <button onclick="generatePedidoReport()" id="generatePedidoBtn"
+                        class="flex-1 bg-burgundy text-white py-2 rounded-lg font-bold hover:opacity-90 transition-opacity">
+                    Generar Reporte
+                </button>
+                <button onclick="resetAndClosePedidoModal()"
+                        class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg font-bold hover:bg-gray-400 transition-colors">
+                    Cancelar
+                </button>
+            </div>
+            
+            <button onclick="resetPedidoForm()" 
+                    id="resetPedidoBtn"
+                    style="display: none;"
+                    class="w-full mt-3 bg-gray-100 text-gray-600 py-2 rounded-lg font-bold hover:bg-gray-200 transition-colors text-sm">
+                Intentar con otro ID
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentReportType = null;
+
+    const API_BASE_URL = 'http://127.0.0.1:8000/api/reportes';
+
+    function getTodayString() {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+
+        return `${year}-${month}-${day}`;
+    }
+
+    function getDefaultStartDateString() {
+        const date = new Date();
+        date.setDate(date.getDate() - 30);
+
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+
+        return `${year}-${month}-${day}`;
+    }
+
+    function getReportTitle(reportType) {
+        switch (reportType) {
+            case 'ventas':
+                return 'Reporte de Ventas';
+            case 'compras':
+                return 'Reporte de Compras';
+            case 'pedidos':
+                return 'Reporte de Pedidos';
+            default:
+                return 'Generar Reporte';
+        }
+    }
+
+    function showModal(reportType) {
+        currentReportType = reportType;
+
+        const modal = document.getElementById('reportModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const startDateInput = document.getElementById('startDateInput');
+        const endDateInput = document.getElementById('endDateInput');
+
+        modalTitle.textContent = getReportTitle(reportType);
+
+        const today = getTodayString();
+
+        startDateInput.max = today;
+        endDateInput.max = today;
+
+        startDateInput.value = getDefaultStartDateString();
+        endDateInput.value = today;
+
+        modal.classList.add('active');
+    }
+
+    function closeModal() {
+        const modal = document.getElementById('reportModal');
+
+        modal.classList.remove('active');
+        currentReportType = null;
+    }
+
+    function showCompraModal() {
+        const modal = document.getElementById('compraModal');
+        resetCompraForm();
+        modal.classList.add('active');
+        document.getElementById('compraIdInput').focus();
+    }
+
+    function closeCompraModal() {
+        const modal = document.getElementById('compraModal');
+        modal.classList.remove('active');
+        resetCompraForm();
+    }
+
+    function resetCompraForm() {
+        const compraIdInput = document.getElementById('compraIdInput');
+        const errorMessage = document.getElementById('idErrorMessage');
+        const alertContainer = document.getElementById('compraAlertContainer');
+        const resetBtn = document.getElementById('resetCompraBtn');
+        const generateBtn = document.getElementById('generateCompraBtn');
+        
+        compraIdInput.value = '';
+        compraIdInput.classList.remove('input-error');
+        compraIdInput.disabled = false;
+        errorMessage.classList.remove('active');
+        errorMessage.textContent = '';
+        alertContainer.innerHTML = '';
+        resetBtn.style.display = 'none';
+        generateBtn.style.display = 'block';
+        generateBtn.disabled = false;
+        generateBtn.innerHTML = 'Generar Reporte';
+    }
+
+    function resetAndCloseCompraModal() {
+        closeCompraModal();
+    }
+
+    function showToast(message, isError = false) {
+        const toast = document.createElement('div');
+
+        toast.className = 'toast';
+        toast.style.backgroundColor = isError ? '#dc2626' : '#4A0E0E';
+        toast.innerHTML = message;
+
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+    }
+
+    function showErrorAlert(containerId, message) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = `
+            <div class="alert-message">
+                <span class="material-symbols-outlined">error</span>
+                <span>${message}</span>
+            </div>
+        `;
+    }
+
+    function showSuccessAlert(containerId, message) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = `
+            <div class="alert-message" style="background-color: #e6f4ea; border-left-color: #34a853; color: #137333;">
+                <span class="material-symbols-outlined">check_circle</span>
+                <span>${message}</span>
+            </div>
+        `;
+    }
+
+    function showPedidoModal() {
+        const modal = document.getElementById('pedidoModal');
+        resetPedidoForm();
+        modal.classList.add('active');
+        document.getElementById('pedidoIdInput').focus();
+    }
+
+    function closePedidoModal() {
+        const modal = document.getElementById('pedidoModal');
+        modal.classList.remove('active');
+        resetPedidoForm();
+    }
+
+    function resetPedidoForm() {
+        const pedidoIdInput = document.getElementById('pedidoIdInput');
+        const errorMessage = document.getElementById('pedidoIdErrorMessage');
+        const alertContainer = document.getElementById('pedidoAlertContainer');
+        const resetBtn = document.getElementById('resetPedidoBtn');
+        const generateBtn = document.getElementById('generatePedidoBtn');
+        
+        pedidoIdInput.value = '';
+        pedidoIdInput.classList.remove('input-error');
+        pedidoIdInput.disabled = false;
+        errorMessage.classList.remove('active');
+        errorMessage.textContent = '';
+        alertContainer.innerHTML = '';
+        resetBtn.style.display = 'none';
+        generateBtn.style.display = 'block';
+        generateBtn.disabled = false;
+        generateBtn.innerHTML = 'Generar Reporte';
+    }
+
+    function resetAndClosePedidoModal() {
+        closePedidoModal();
+    }
+
+    function validatePedidoIdFormat(pedidoId) {
+        const errorMessage = document.getElementById('pedidoIdErrorMessage');
+        const pedidoIdInput = document.getElementById('pedidoIdInput');
+
+        if (!pedidoId || pedidoId.trim() === '') {
+            errorMessage.textContent = 'Por favor, ingresa el ID del pedido';
+            errorMessage.classList.add('active');
+            pedidoIdInput.classList.add('input-error');
+            return false;
+        }
+
+        if (!/^\d+$/.test(pedidoId)) {
+            errorMessage.textContent = 'El ID debe contener solo números';
+            errorMessage.classList.add('active');
+            pedidoIdInput.classList.add('input-error');
+            return false;
+        }
+
+        const idNumber = parseInt(pedidoId, 10);
+
+        if (idNumber <= 0) {
+            errorMessage.textContent = 'El ID debe ser un número positivo mayor que cero';
+            errorMessage.classList.add('active');
+            pedidoIdInput.classList.add('input-error');
+            return false;
+        }
+
+        errorMessage.classList.remove('active');
+        pedidoIdInput.classList.remove('input-error');
+        errorMessage.textContent = '';
+
+        return true;
+    }
+
+    async function checkPedidoExists(pedidoId) {
+        try {
+            const url = `${API_BASE_URL}/pedido/${pedidoId}`;
+
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+            const response = await fetch(url, {
+                method: 'GET',
+                signal: controller.signal
+            });
+
+            clearTimeout(timeoutId);
+
+            if (response.ok) {
+                return { exists: true, error: null };
+            }
+
+            if (response.status === 404) {
+                return { exists: false, error: '❌ El ID de pedido no existe en la base de datos. Por favor, verifica el número e intenta nuevamente.' };
+            }
+
+            return { exists: false, error: `⚠️ No se encontro el pedido.` };
+
+        } catch (error) {
+            console.error('Error verificando pedido:', error);
+
+            if (error.name === 'AbortError') {
+                return { exists: false, error: '⏱️ La solicitud ha excedido el tiempo de espera. Verifica tu conexión.' };
+            }
+
+            return { exists: false, error: '🔌 Error de conexión. No se pudo verificar el ID. Revisa tu red.' };
+        }
+    }
+
+    async function generatePedidoReport() {
+        const pedidoIdInput = document.getElementById('pedidoIdInput');
+        const generateBtn = document.getElementById('generatePedidoBtn');
+        const errorMessage = document.getElementById('pedidoIdErrorMessage');
+        const alertContainer = document.getElementById('pedidoAlertContainer');
+        const resetBtn = document.getElementById('resetPedidoBtn');
+
+        let pedidoId = pedidoIdInput.value.trim();
+        // Limpiar alertas previas
+        alertContainer.innerHTML = '';
+        errorMessage.classList.remove('active');
+        pedidoIdInput.classList.remove('input-error');
+
+        if (!validatePedidoIdFormat(pedidoId)) {
+            return;
+        }
+
+        const idNumber = parseInt(pedidoId, 10);
+
+        const originalText = generateBtn.innerHTML;
+        generateBtn.innerHTML = '<span class="loading-spinner"></span> Verificando ID...';
+        generateBtn.disabled = true;
+
+        try {
+            const checkResult = await checkPedidoExists(idNumber);
+
+            if (!checkResult.exists) {
+                // Mostrar alerta de error
+                showErrorAlert('pedidoAlertContainer', checkResult.error);
+                pedidoIdInput.classList.add('input-error');
+                
+                // Mostrar botón de reintento y ocultar el de generar temporalmente
+                generateBtn.style.display = 'none';
+                resetBtn.style.display = 'block';
+                
+                showToast(checkResult.error, true);
+                return;
+            }
+
+         
+            
+            const url = `${API_BASE_URL}/pedido/${idNumber}`;
+            
+            // Pequeña pausa para mostrar el mensaje de éxito
+            setTimeout(() => {
+                const newWindow = window.open(url, '_blank');
+
+                if (newWindow) {
+                    showToast(`📄 Abriendo reporte de pedido #${idNumber}...`);
+                    setTimeout(() => {
+                        closePedidoModal();
+                    }, 500);
+                } else {
+                    showToast('⚠️ Por favor, permite ventanas emergentes para ver el reporte', true);
+                }
+            }, 800);
+
+        } catch (error) {
+            console.error('Error al generar el reporte:', error);
+            showErrorAlert('pedidoAlertContainer', '❌ Error inesperado al generar el reporte. Intenta nuevamente.');
+            showToast('Error al generar el reporte', true);
+            
+            generateBtn.style.display = 'none';
+            resetBtn.style.display = 'block';
+        } finally {
+            generateBtn.innerHTML = originalText;
+            generateBtn.disabled = false;
+        }
+    }
+
+    function validateDateRange(fechaInicio, fechaFin) {
+        const today = getTodayString();
+
+        if (!fechaInicio || !fechaFin) {
+            showToast('Por favor, selecciona ambas fechas', true);
+            return false;
+        }
+
+        if (fechaInicio > today || fechaFin > today) {
+            showToast('Las fechas no pueden ser futuras', true);
+            return false;
+        }
+
+        if (fechaInicio > fechaFin) {
+            showToast('La fecha de inicio debe ser anterior o igual a la fecha de fin', true);
+            return false;
+        }
+
+        return true;
+    }
+
+    function generateInventarioReport() {
+        const url = `${API_BASE_URL}/inventario`;
+
+        window.open(url, '_blank');
+        showToast('Abriendo reporte de inventario...');
+    }
+
+    async function generateReport() {
+        const startDateInput = document.getElementById('startDateInput');
+        const endDateInput = document.getElementById('endDateInput');
+        const generateBtn = document.getElementById('generateBtn');
+
+        const fechaInicio = startDateInput.value;
+        const fechaFin = endDateInput.value;
+
+        if (!currentReportType) {
+            showToast('Error: Tipo de reporte no especificado', true);
+            return;
+        }
+
+        if (!validateDateRange(fechaInicio, fechaFin)) {
+            return;
+        }
+
+        const originalText = generateBtn.innerHTML;
+        generateBtn.innerHTML = '<span class="loading-spinner"></span> Generando...';
+        generateBtn.disabled = true;
+
+        try {
+            let url = '';
+
+            switch (currentReportType) {
+                case 'ventas':
+                    url = `${API_BASE_URL}/ventas?fecha_inicio=${fechaInicio}&fecha_fin=${fechaFin}`;
+                    break;
+                case 'compras':
+                    url = `reporte_compra.html?fecha_inicio=${fechaInicio}&fecha_fin=${fechaFin}`;
+                    window.location.href = url;
+                    return;
+
+                case 'pedidos':
+                    url = `reporte_pedido.html?fecha_inicio=${fechaInicio}&fecha_fin=${fechaFin}`;
+                    window.location.href = url;
+                    return;
+                default:
+                    throw new Error('Tipo de reporte no válido');
+            }
+
+            window.open(url, '_blank');
+            showToast(`Abriendo reporte de ${currentReportType}...`);
+            closeModal();
+
+        } catch (error) {
+            console.error('Error:', error);
+            showToast('Error al generar el reporte. Por favor, intenta nuevamente.', true);
+        } finally {
+            generateBtn.innerHTML = originalText;
+            generateBtn.disabled = false;
+        }
+    }
+
+    function validateCompraIdFormat(compraId) {
+        const errorMessage = document.getElementById('idErrorMessage');
+        const compraIdInput = document.getElementById('compraIdInput');
+        
+        if (!compraId || compraId.trim() === '') {
+            errorMessage.textContent = 'Por favor, ingresa el ID de la compra';
+            errorMessage.classList.add('active');
+            compraIdInput.classList.add('input-error');
+            return false;
+        }
+        
+        if (!/^\d+$/.test(compraId)) {
+            errorMessage.textContent = 'El ID debe contener solo números (sin letras, espacios o símbolos)';
+            errorMessage.classList.add('active');
+            compraIdInput.classList.add('input-error');
+            return false;
+        }
+        
+        const idNumber = parseInt(compraId, 10);
+        if (idNumber <= 0) {
+            errorMessage.textContent = 'El ID debe ser un número positivo mayor que cero';
+            errorMessage.classList.add('active');
+            compraIdInput.classList.add('input-error');
+            return false;
+        }
+        
+        errorMessage.classList.remove('active');
+        compraIdInput.classList.remove('input-error');
+        errorMessage.textContent = '';
+        
+        return true;
+    }
+
+    async function checkCompraExists(compraId) {
+        try {
+            const url = `${API_BASE_URL}/compra/${compraId}`;
+            
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000);
+            
+            const response = await fetch(url, {
+                method: 'GET',
+                signal: controller.signal
+            });
+            
+            clearTimeout(timeoutId);
+            
+            if (response.ok) {
+                return { exists: true, error: null };
+            }
+            
+            if (response.status === 404) {
+                return { exists: false, error: '❌ El ID de compra no existe en la base de datos. Por favor, verifica el número e intenta nuevamente.' };
+            }
+            
+            return { exists: false, error: `⚠️ Error al encontrar la compra ` };
+            
+        } catch (error) {
+            console.error('Error verificando compra:', error);
+            
+            if (error.name === 'AbortError') {
+                return { exists: false, error: '⏱️ La solicitud ha excedido el tiempo de espera. Verifica tu conexión.' };
+            }
+            
+            return { exists: false, error: '🔌 Error de conexión. No se pudo verificar el ID. Revisa tu red.' };
+        }
+    }
+
+    async function generateCompraReport() {
+        const compraIdInput = document.getElementById('compraIdInput');
+        const generateBtn = document.getElementById('generateCompraBtn');
+        const errorMessage = document.getElementById('idErrorMessage');
+        const alertContainer = document.getElementById('compraAlertContainer');
+        const resetBtn = document.getElementById('resetCompraBtn');
+        
+        let compraId = compraIdInput.value.trim();
+
+        // Limpiar alertas previas
+        alertContainer.innerHTML = '';
+        errorMessage.classList.remove('active');
+        compraIdInput.classList.remove('input-error');
+
+        if (!validateCompraIdFormat(compraId)) {
+            return;
+        }
+
+        const idNumber = parseInt(compraId, 10);
+        
+        const originalText = generateBtn.innerHTML;
+        generateBtn.innerHTML = '<span class="loading-spinner"></span> Verificando ID...';
+        generateBtn.disabled = true;
+
+        try {
+            const checkResult = await checkCompraExists(idNumber);
+            
+            if (!checkResult.exists) {
+                // Mostrar alerta de error
+                showErrorAlert('compraAlertContainer', checkResult.error);
+                compraIdInput.classList.add('input-error');
+                
+                // Mostrar botón de reintento y ocultar el de generar temporalmente
+                generateBtn.style.display = 'none';
+                resetBtn.style.display = 'block';
+                
+                showToast(checkResult.error, true);
+                return;
+            }
+            
+      
+            
+            const url = `${API_BASE_URL}/compra/${idNumber}`;
+            
+            // Pequeña pausa para mostrar el mensaje de éxito
+            setTimeout(() => {
+                const newWindow = window.open(url, '_blank');
+                
+                if (newWindow) {
+                    showToast(`📄 Abriendo reporte de compra #${idNumber}...`);
+                    setTimeout(() => {
+                        closeCompraModal();
+                    }, 500);
+                } else {
+                    showToast('⚠️ Por favor, permite ventanas emergentes para ver el reporte', true);
+                }
+            }, 800);
+
+        } catch (error) {
+            console.error('Error al generar el reporte:', error);
+            showErrorAlert('compraAlertContainer', '❌ Error inesperado al generar el reporte. Intenta nuevamente.');
+            showToast('Error al generar el reporte', true);
+            
+            generateBtn.style.display = 'none';
+            resetBtn.style.display = 'block';
+        } finally {
+            generateBtn.innerHTML = originalText;
+            generateBtn.disabled = false;
+        }
+    }
+
+    // Cerrar modal de fechas al hacer clic fuera
+    document.getElementById('reportModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeModal();
+        }
+    });
+
+    // Cerrar modal de compra al hacer clic fuera
+    document.getElementById('compraModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeCompraModal();
+        }
+    });
+
+    // Validación en tiempo real para el input del ID de compra
+    document.getElementById('compraIdInput').addEventListener('input', function(e) {
+        const value = e.target.value;
+        const errorMessage = document.getElementById('idErrorMessage');
+        const compraIdInput = document.getElementById('compraIdInput');
+        const alertContainer = document.getElementById('compraAlertContainer');
+        
+        // Limpiar alerta al empezar a escribir
+        alertContainer.innerHTML = '';
+        
+        // Permitir solo números mientras escribe
+        if (value && !/^\d*$/.test(value)) {
+            e.target.value = value.replace(/[^\d]/g, '');
+        }
+        
+        // Si el campo está vacío o tiene valor, limpiar error al escribir
+        if (errorMessage.classList.contains('active')) {
+            errorMessage.classList.remove('active');
+            compraIdInput.classList.remove('input-error');
+        }
+    });
+
+    // Enter key para el modal de fechas
+    document.getElementById('startDateInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            generateReport();
+        }
+    });
+
+    document.getElementById('endDateInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            generateReport();
+        }
+    });
+
+    // Enter key para el modal de compra
+    document.getElementById('compraIdInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            generateCompraReport();
+        }
+    });
+
+    document.getElementById('pedidoModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closePedidoModal();
+        }
+    });
+
+    document.getElementById('pedidoIdInput').addEventListener('input', function(e) {
+        const value = e.target.value;
+        const errorMessage = document.getElementById('pedidoIdErrorMessage');
+        const pedidoIdInput = document.getElementById('pedidoIdInput');
+        const alertContainer = document.getElementById('pedidoAlertContainer');
+        
+        // Limpiar alerta al empezar a escribir
+        alertContainer.innerHTML = '';
+
+        if (value && !/^\d*$/.test(value)) {
+            e.target.value = value.replace(/[^\d]/g, '');
+        }
+
+        if (errorMessage.classList.contains('active')) {
+            errorMessage.classList.remove('active');
+            pedidoIdInput.classList.remove('input-error');
+        }
+    });
+
+    document.getElementById('pedidoIdInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            generatePedidoReport();
+        }
+    });
+</script>
+
+</body>
+</html>

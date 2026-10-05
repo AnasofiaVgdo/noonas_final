@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Nonna - Gestión de Compras</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+<script>
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: {
+                    primary: "#5D1927",
+                    "background-light": "#FEBDC6",
+                    "background-dark": "#1a070a",
+                },
+                fontFamily: {
+                    display: ["Plus Jakarta Sans", "sans-serif"],
+                },
+                borderRadius: { DEFAULT: "0.75rem" },
+            },
+        },
+    };
+</script>
+<style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #FEBDC6; }
+    .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        vertical-align: middle;
+    }
+    .modal-mensaje { transition: opacity 0.3s ease, visibility 0.3s ease; }
+</style>
+</head>
+<body class="min-h-screen bg-background-light dark:bg-background-dark transition-colors duration-300">
+
+<!-- Top Navigation Bar -->
+<header class="w-full bg-[#f3dfe0] dark:bg-slate-900 border-b border-primary/10 px-6 py-4 flex items-center justify-between sticky top-0 z-50">
+    <div class="flex items-center gap-6">
+        <div class="flex items-center gap-3">
+            <div class="bg-primary p-2 rounded-lg text-white">
+                <span class="material-symbols-outlined block text-2xl">bakery_dining</span>
+            </div>
+            <h1 class="text-primary text-xl font-bold tracking-tight">Nonna</h1>
+        </div>
+        <div class="h-8 w-[1px] bg-primary/20"></div>
+        <a href="menu.html" class="flex items-center gap-2 text-primary hover:bg-primary/10 px-4 py-2 rounded-lg transition-colors duration-200">
+            <span class="material-symbols-outlined">arrow_back</span>
+            <span class="text-sm font-bold leading-normal">Menú de CRUDs</span>
+        </a>
+    </div>
+    <div class="flex items-center gap-4">
+        <div class="flex items-center gap-3 pl-4 border-l border-slate-200 dark:border-slate-700">
+            <div class="text-right hidden sm:block">
+                <p id="textoUsuario" class="text-sm font-semibold text-slate-900 dark:text-slate-100">Nombre de usuario</p>
+                <p id="textoRol" class="text-xs text-slate-500">Rol</p>
+            </div>
+        </div>
+        <button id="botonCerrarSesion" class="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all duration-300 shadow-md hover:shadow-lg">
+            <span class="material-symbols-outlined text-xl">logout</span>
+            <span class="hidden sm:inline text-sm font-medium">Cerrar Sesión</span>
+        </button>
+    </div>
+</header>
+<script>
+    document.getElementById("textoUsuario").innerText = localStorage.getItem("usuario") || "Invitado";
+    document.getElementById("textoRol").innerText = localStorage.getItem("rol") || "Sin rol";
+    const botonCerrarSesion = document.getElementById("botonCerrarSesion");
+    botonCerrarSesion.addEventListener("click", function () {
+        localStorage.clear();
+        window.location.href = "/index.html";
+    });
+</script>
+
+<main class="max-w-7xl mx-auto px-6 py-10">
+    <div class="mb-10">
+        <h1 class="text-4xl font-display font-bold text-primary dark:text-pink-100 tracking-tight">Gestión de Compras</h1>
+        <p class="text-primary/70 dark:text-pink-200/60 mt-2">Registro de compras a proveedores y actualización automática de inventario.</p>
+    </div>
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div class="relative flex-1 max-w-lg">
+            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-primary/40">search</span>
+            <input id="buscador" class="w-full pl-10 pr-4 py-3 bg-white dark:bg-zinc-900 border-none rounded-xl shadow-sm focus:ring-2 focus:ring-primary dark:text-white placeholder:text-gray-400 transition-all" placeholder="Buscar por proveedor o ID...">
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="compra_nuevo.html" class="bg-primary hover:bg-opacity-90 text-white px-6 py-3 rounded-xl flex items-center gap-2 shadow-lg shadow-primary/20 transition-all active:scale-95">
+                <span class="material-symbols-outlined">add</span>
+                <span class="font-semibold">Nueva Compra</span>
+            </a>
+        </div>
+    </div>
+    <div class="bg-white dark:bg-zinc-900 rounded-2xl shadow-xl overflow-hidden border border-white/20 dark:border-zinc-800">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-50 dark:bg-zinc-800/50 border-b border-gray-100 dark:border-zinc-800">
+                        <th class="px-6 py-4 text-xs text-primary dark:text-pink-200 uppercase tracking-wider font-bold">Proveedor</th>
+                        <th class="px-6 py-4 text-xs text-primary dark:text-pink-200 uppercase tracking-wider font-bold">Fecha</th>
+                        <th class="px-6 py-4 text-xs text-primary dark:text-pink-200 uppercase tracking-wider font-bold text-right">Total</th>
+                        <th class="px-6 py-4 text-xs text-primary dark:text-pink-200 uppercase tracking-wider font-bold text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-compras" class="divide-y divide-gray-100 dark:divide-zinc-800">
+                    <tr><td colspan="4" class="text-center py-10 text-primary/50">Cargando compras...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="px-6 py-4 bg-gray-50 dark:bg-zinc-800/30 border-t border-gray-100 dark:border-zinc-800">
+            <span id="total-registros" class="text-sm text-gray-500 dark:text-zinc-500">Cargando...</span>
+        </div>
+    </div>
+</main>
+
+<!-- MODALES -->
+<div id="modal-exito" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4"><span class="material-symbols-outlined text-green-600 text-5xl">check_circle</span></div>
+        <h3 id="exito-titulo" class="text-xl font-bold text-slate-900">¡Éxito!</h3>
+        <p id="exito-mensaje" class="text-slate-500 mt-2"></p>
+        <button id="btn-cerrar-exito" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Continuar</button>
+    </div>
+</div>
+<div id="modal-error" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4"><span class="material-symbols-outlined text-red-600 text-5xl">error</span></div>
+        <h3 class="text-xl font-bold text-slate-900">Error</h3>
+        <p id="error-mensaje" class="text-slate-500 mt-2"></p>
+        <button id="btn-cerrar-error" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Aceptar</button>
+    </div>
+</div>
+<div id="modal-confirmar" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4"><span class="material-symbols-outlined text-red-500 text-5xl">warning</span></div>
+        <h3 class="text-xl font-bold text-slate-900">Confirmar eliminación</h3>
+        <p id="confirmar-mensaje" class="text-slate-500 mt-2">¿Estás seguro de que deseas eliminar esta compra?</p>
+        <div class="flex gap-3 mt-6">
+            <button id="btn-cancelar-eliminar" class="flex-1 py-2 px-4 rounded-xl border border-primary/30 text-primary font-bold hover:bg-primary/5 transition-colors">Cancelar</button>
+            <button id="btn-confirmar-eliminar" class="flex-1 py-2 px-4 rounded-xl bg-red-600 text-white font-bold hover:bg-red-700 transition-colors">Eliminar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_BASE = 'http://127.0.0.1:8000/api';
+    const TOKEN = localStorage.token;
+    if (!TOKEN) { alert('No hay sesión activa.'); window.location.href = '/index.html'; }
+
+    function getHeaders() {
+        return { 'accept': 'application/json', 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' };
+    }
+
+    function mostrarExito(mensaje, callback) {
+        const modal = document.getElementById('modal-exito');
+        document.getElementById('exito-titulo').innerText = '¡Éxito!';
+        document.getElementById('exito-mensaje').innerText = mensaje;
+        modal.classList.remove('hidden');
+        document.getElementById('btn-cerrar-exito').onclick = () => { modal.classList.add('hidden'); if (callback) callback(); };
+    }
+
+    function mostrarError(mensaje) {
+        const modal = document.getElementById('modal-error');
+        document.getElementById('error-mensaje').innerText = mensaje;
+        modal.classList.remove('hidden');
+        document.getElementById('btn-cerrar-error').onclick = () => modal.classList.add('hidden');
+    }
+
+    let compraAEliminar = null;
+
+    function mostrarConfirmacionEliminar(id, proveedor) {
+        compraAEliminar = id;
+        document.getElementById('confirmar-mensaje').innerText = `¿Estás seguro de que deseas eliminar la compra a "${proveedor}"? Esta acción no se puede deshacer.`;
+        document.getElementById('modal-confirmar').classList.remove('hidden');
+    }
+
+    document.getElementById('btn-cancelar-eliminar').addEventListener('click', () => {
+        document.getElementById('modal-confirmar').classList.add('hidden');
+        compraAEliminar = null;
+    });
+
+    document.getElementById('btn-confirmar-eliminar').addEventListener('click', async () => {
+        document.getElementById('modal-confirmar').classList.add('hidden');
+        if (compraAEliminar) { await eliminarCompra(compraAEliminar); compraAEliminar = null; }
+    });
+
+    async function eliminarCompra(id) {
+        try {
+            const res = await fetch(`${API_BASE}/compra/${id}`, { method: 'DELETE', headers: getHeaders() });
+            if (!res.ok) { const err = await res.json(); throw new Error(err.detail || 'Error al eliminar'); }
+            mostrarExito('La compra se ha eliminado correctamente.', () => cargarYRenderizar());
+        } catch (error) { mostrarError('Error al eliminar: ' + error.message); }
+    }
+
+    let proveedoresMap = {};
+    let todasCompras = [];
+
+    async function cargarProveedores() {
+        try {
+            const res = await fetch(`${API_BASE}/proveedor/`, { headers: getHeaders() });
+            if (res.ok) {
+                const proveedores = await res.json();
+                proveedoresMap = {};
+                proveedores.forEach(p => proveedoresMap[p.id_proveedor] = p.descripcion || `Proveedor ${p.id_proveedor}`);
+            }
+        } catch(e) { console.error(e); }
+    }
+
+    async function listarCompras() {
+        const res = await fetch(`${API_BASE}/compra/`, { headers: getHeaders() });
+        if (!res.ok) throw new Error(`Error ${res.status}`);
+        return res.json();
+    }
+
+    function renderizarTabla(compras) {
+        const tbody = document.getElementById('tabla-compras');
+        if (!compras.length) {
+            tbody.innerHTML = `<tr><td colspan="4" class="text-center py-10 text-primary/50">No hay compras registradas. Crea la primera.</td></tr>`;
+            document.getElementById('total-registros').innerText = 'Mostrando 0 compras';
+            return;
+        }
+        tbody.innerHTML = '';
+        compras.forEach(comp => {
+            const proveedor = proveedoresMap[comp.id_proveedor] || `ID ${comp.id_proveedor}`;
+            const fecha = new Date(comp.fecha).toLocaleDateString('es-ES');
+            const fila = `
+                <tr class="hover:bg-gray-50 dark:hover:bg-zinc-800/30 transition-colors">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center gap-3">
+                            <div class="h-8 w-8 rounded-full bg-pink-100 dark:bg-zinc-800 flex items-center justify-center text-primary dark:text-pink-200 text-xs font-bold">
+                                ${escapeHtml(proveedor.charAt(0).toUpperCase())}
+                            </div>
+                            <span class="text-sm font-semibold text-gray-900 dark:text-zinc-100">${escapeHtml(proveedor)}</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-zinc-400">${fecha}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right">
+                        <span class="text-sm font-bold text-primary">$${comp.total.toFixed(2)}</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                        <div class="flex justify-center gap-2">
+                            <a href="compra_editar.html?id=${comp.id_compra}" class="p-2 text-primary/60 hover:text-primary hover:bg-primary/10 rounded-lg transition-all" title="Editar">
+                                <span class="material-symbols-outlined text-xl">edit</span>
+                            </a>
+                            <button onclick="mostrarConfirmacionEliminar(${comp.id_compra}, '${escapeHtml(proveedor)}')" class="p-2 text-primary/40 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all" title="Eliminar">
+                                <span class="material-symbols-outlined text-xl">delete</span>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            tbody.insertAdjacentHTML('beforeend', fila);
+        });
+        document.getElementById('total-registros').innerText = `Mostrando ${compras.length} compras`;
+    }
+
+    async function cargarYRenderizar() {
+        const tbody = document.getElementById('tabla-compras');
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center py-10 text-primary/50">Cargando...</td></tr>`;
+        try {
+            await cargarProveedores();
+            todasCompras = await listarCompras();
+            renderizarTabla(todasCompras);
+        } catch (error) {
+            console.error(error);
+            tbody.innerHTML = `<tr><td colspan="4" class="text-center py-10 text-red-500">Error al cargar: ${error.message}</td></tr>`;
+        }
+    }
+
+    const buscador = document.getElementById('buscador');
+    if (buscador) {
+        buscador.addEventListener('input', (e) => {
+            const texto = e.target.value.toLowerCase();
+            if (!texto.trim()) return renderizarTabla(todasCompras);
+            const filtrados = todasCompras.filter(c => {
+                const proveedor = proveedoresMap[c.id_proveedor] || '';
+                return proveedor.toLowerCase().includes(texto) || c.id_compra.toString().includes(texto);
+            });
+            renderizarTabla(filtrados);
+        });
+    }
+
+    function escapeHtml(str) { return str ? str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : (m === '<' ? '&lt;' : '&gt;')) : ''; }
+
+    window.mostrarConfirmacionEliminar = mostrarConfirmacionEliminar;
+    cargarYRenderizar();
+</script>
+</body>
+</html>

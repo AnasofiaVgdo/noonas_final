@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Editar Usuario - Nonna DB</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+<script>
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: { "primary": "#5d1927", "accent-pink": "#FEBDC6" },
+                fontFamily: { "sans": ["Montserrat", "sans-serif"] },
+                borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px" },
+            },
+        },
+    }
+</script>
+<style>
+    body { font-family: "Montserrat", sans-serif; background-color: #FEBDC6; }
+    .modal-mensaje {
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    .custom-select {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%235d1927' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+        background-position: right 0.75rem center;
+        background-repeat: no-repeat;
+        background-size: 1.25em 1.25em;
+    }
+</style>
+</head>
+<body class="bg-[#FEBDC6] min-h-screen flex items-center justify-center p-4">
+<div class="bg-white w-full max-w-[900px] rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+
+    <header class="flex items-center justify-between border-b border-slate-100 px-10 py-6 bg-white">
+        <div class="flex items-center gap-4">
+            <div class="bg-primary/10 p-3 rounded-xl text-primary">
+                <span class="material-symbols-outlined text-3xl">manage_accounts</span>
+            </div>
+            <div>
+                <h1 class="text-slate-900 text-2xl font-extrabold tracking-tight">Editar Usuario</h1>
+                <p class="text-slate-500 text-sm">Actualice la información del perfil del sistema Nonna.</p>
+            </div>
+        </div>
+        <a href="usuarios.html" class="text-slate-400 hover:text-slate-600 transition-colors">
+            <span class="material-symbols-outlined">close</span>
+        </a>
+    </header>
+
+    <main class="flex-1 overflow-y-auto p-10 bg-slate-50/50">
+        <div class="max-w-2xl mx-auto space-y-8">
+            <section class="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm">
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="material-symbols-outlined text-primary">person</span>
+                    <h2 class="text-lg font-bold text-slate-900">Datos del Usuario</h2>
+                </div>
+                <form id="form-editar" class="grid grid-cols-1 gap-6">
+                    <input type="hidden" id="id_usuario">
+                    <input type="hidden" id="nombre_original">
+
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-bold text-slate-700">Nombre de Usuario *</label>
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xl">person</span>
+                            <input id="nombre" class="w-full rounded-xl border-slate-200 bg-slate-50 pl-11 pr-4 py-3 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="Ingrese nombre de usuario" type="text" required>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-bold text-slate-700">Rol del Usuario *</label>
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xl">badge</span>
+                            <select id="id_rol" class="w-full rounded-xl border-slate-200 bg-slate-50 pl-11 pr-10 py-3 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all custom-select" required>
+                                <option value="">Cargando roles...</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-bold text-slate-700">Nueva Contraseña</label>
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xl">lock</span>
+                            <input id="contrasena" class="w-full rounded-xl border-slate-200 bg-slate-50 pl-11 pr-12 py-3 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="Dejar en blanco para mantener la actual" type="password">
+                            <button type="button" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-colors toggle-password">
+                                <span class="material-symbols-outlined text-xl">visibility</span>
+                            </button>
+                        </div>
+                        <p class="text-xs text-slate-400 ml-1">Se recomienda usar al menos 8 caracteres con letras y números.</p>
+                    </div>
+                </form>
+            </section>
+        </div>
+    </main>
+
+    <footer class="border-t border-slate-100 p-8 flex justify-end gap-4 bg-white">
+        <a href="usuarios.html" class="px-8 py-3 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-all">Cancelar</a>
+        <button type="submit" form="form-editar" id="btn-submit" class="px-10 py-3 rounded-xl bg-primary text-white font-bold hover:bg-primary/95 transition-all shadow-lg shadow-primary/30 flex items-center gap-2">
+            <span class="material-symbols-outlined">check_circle</span> Guardar Cambios
+        </button>
+    </footer>
+</div>
+
+<!-- MODALES CENTRALES -->
+<div id="modal-exito" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4"><span class="material-symbols-outlined text-green-600 text-5xl">check_circle</span></div>
+        <h3 id="exito-titulo" class="text-xl font-bold text-slate-900">¡Éxito!</h3>
+        <p id="exito-mensaje" class="text-slate-500 mt-2"></p>
+        <button id="btn-cerrar-exito" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Continuar</button>
+    </div>
+</div>
+
+<div id="modal-error" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4"><span class="material-symbols-outlined text-red-600 text-5xl">error</span></div>
+        <h3 class="text-xl font-bold text-slate-900">Error</h3>
+        <p id="error-mensaje" class="text-slate-500 mt-2"></p>
+        <button id="btn-cerrar-error" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Aceptar</button>
+    </div>
+</div>
+
+<div id="modal-warning" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4"><span class="material-symbols-outlined text-amber-600 text-5xl">warning</span></div>
+        <h3 class="text-xl font-bold text-slate-900">Aviso</h3>
+        <p id="warning-mensaje" class="text-slate-500 mt-2"></p>
+        <button id="btn-cerrar-warning" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Aceptar</button>
+    </div>
+</div>
+
+<script>
+    const API_BASE = 'http://127.0.0.1:8000/api';
+    const TOKEN = localStorage.token;
+
+    function getHeaders() {
+        return { 'accept': 'application/json', 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' };
+    }
+
+    function mostrarExito(mensaje, callback) {
+        const modal = document.getElementById('modal-exito');
+        document.getElementById('exito-titulo').innerText = '¡Éxito!';
+        document.getElementById('exito-mensaje').innerText = mensaje;
+        modal.classList.remove('hidden');
+        document.getElementById('btn-cerrar-exito').onclick = () => {
+            modal.classList.add('hidden');
+            if (callback) callback();
+        };
+    }
+
+    function mostrarError(mensaje) {
+        const modal = document.getElementById('modal-error');
+        document.getElementById('error-mensaje').innerText = mensaje;
+        modal.classList.remove('hidden');
+        document.getElementById('btn-cerrar-error').onclick = () => modal.classList.add('hidden');
+    }
+
+    function mostrarWarning(mensaje) {
+        const modal = document.getElementById('modal-warning');
+        document.getElementById('warning-mensaje').innerText = mensaje;
+        modal.classList.remove('hidden');
+        document.getElementById('btn-cerrar-warning').onclick = () => modal.classList.add('hidden');
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const usuarioNombre = urlParams.get('nombre');
+    if (!usuarioNombre) {
+        mostrarWarning('No se especificó qué usuario editar. Redirigiendo...');
+        setTimeout(() => window.location.href = 'usuarios.html', 2000);
+    }
+
+    async function cargarRoles(rolSeleccionadoId) {
+        try {
+            const res = await fetch(`${API_BASE}/rol/`, { headers: getHeaders() });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const roles = await res.json();
+            const select = document.getElementById('id_rol');
+            select.innerHTML = '<option value="">Seleccione un rol</option>';
+            roles.forEach(rol => {
+                const option = document.createElement('option');
+                option.value = rol.id_rol;
+                option.textContent = rol.descripcion || `Rol ${rol.id_rol}`;
+                if (rolSeleccionadoId && rol.id_rol === rolSeleccionadoId) option.selected = true;
+                select.appendChild(option);
+            });
+        } catch (error) { mostrarError('Error al cargar roles: ' + error.message); }
+    }
+
+    async function cargarUsuario() {
+        try {
+            // Intentar primero por nombre, luego por ID
+            let res = await fetch(`${API_BASE}/usuario/nombre/${usuarioNombre}`, { headers: getHeaders() });
+            if (res.status === 404) {
+                // Si no funciona por nombre, intentar por ID
+                res = await fetch(`${API_BASE}/usuario/id/${usuarioNombre}`, { headers: getHeaders() });
+            }
+            if (res.status === 404) throw new Error(`Usuario "${usuarioNombre}" no encontrado.`);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const usuario = await res.json();
+            document.getElementById('id_usuario').value = usuario.id_usuario;
+            document.getElementById('nombre_original').value = usuario.nombre;
+            document.getElementById('nombre').value = usuario.nombre || '';
+            await cargarRoles(usuario.id_rol);
+        } catch (error) {
+            mostrarError('Error al cargar el usuario: ' + error.message);
+            document.getElementById('nombre').disabled = true;
+            document.getElementById('id_rol').disabled = true;
+            document.getElementById('contrasena').disabled = true;
+        }
+    }
+
+    async function actualizarUsuario(event) {
+        event.preventDefault();
+        const nuevoNombre = document.getElementById('nombre').value.trim();
+        const id_rol = parseInt(document.getElementById('id_rol').value);
+        const contrasena = document.getElementById('contrasena').value;
+        const id_usuario = document.getElementById('id_usuario').value;
+
+        if (!nuevoNombre) { mostrarWarning('El nombre es obligatorio'); return; }
+        if (!id_rol) { mostrarWarning('Seleccione un rol'); return; }
+
+        const datos = { nombre: nuevoNombre, id_rol };
+        if (contrasena) datos.contrasena = contrasena;
+
+        const btnSubmit = document.getElementById('btn-submit');
+        const originalText = btnSubmit.innerHTML;
+        btnSubmit.innerHTML = '<span class="material-symbols-outlined animate-spin text-lg">progress_activity</span> Guardando...';
+        btnSubmit.disabled = true;
+
+        try {
+            let res = await fetch(`${API_BASE}/usuario/${id_usuario}`, { method: 'PUT', headers: getHeaders(), body: JSON.stringify(datos) });
+            if (res.status === 404) {
+                const nombreOriginal = document.getElementById('nombre_original').value;
+                res = await fetch(`${API_BASE}/usuario/nombre/${nombreOriginal}`, { method: 'PUT', headers: getHeaders(), body: JSON.stringify(datos) });
+            }
+            if (!res.ok) { const err = await res.json(); throw new Error(err.detail || `HTTP ${res.status}`); }
+            mostrarExito('Usuario actualizado correctamente', () => {
+                window.location.href = 'usuarios.html';
+            });
+        } catch (error) { 
+            mostrarError('Error al actualizar: ' + error.message);
+            btnSubmit.innerHTML = originalText;
+            btnSubmit.disabled = false;
+        }
+    }
+
+    document.querySelectorAll('.toggle-password').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const input = btn.previousElementSibling;
+            const iconSpan = btn.querySelector('.material-symbols-outlined');
+            if (input.type === 'password') { input.type = 'text'; iconSpan.innerText = 'visibility_off'; }
+            else { input.type = 'password'; iconSpan.innerText = 'visibility'; }
+        });
+    });
+
+    document.getElementById('form-editar').addEventListener('submit', actualizarUsuario);
+    cargarUsuario();
+</script>
+</body>
+</html>

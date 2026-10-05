@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Noonas Pastelería · Productos reales</title>
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+</head>
+<body>
+
+<header>
+  <a href="https://www.instagram.com/nonna_slw/?hl=es" target="_blank" rel="noopener noreferrer">
+    <img src="/assets/images/logoNoonas.jpg" alt="Logo Noonas" class="logo" onerror="this.src='https://placehold.co/200x200?text=Noonas'"/>
+  </a>
+  <div class="header-center">
+    <h1>Noonas</h1>
+    <p class="tagline">Hecho con Amor</p>
+  </div>
+  <div class="header-search">
+    <input type="text" id="orderInput" placeholder="Número de pedido" 
+    inputmode="numeric" pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
+    <button onclick="buscarPedido()">Buscar</button>
+    <p id="orderResult"></p>
+  </div>
+</header>
+
+<nav>
+  <a href="#pasteles">Pasteles</a>
+  <a href="#contacto">Contacto</a>
+</nav>
+
+<main>
+  <section id="pasteles">
+    <h2>Nuestros Pasteles</h2>
+    <div id="productosGrid" class="grid">
+      <div class="loading-message">🍰 Cargando deliciosos pasteles...</div>
+    </div>
+  </section>
+
+  <section id="contacto">
+    <h2>Contáctanos</h2>
+    <p>WhatsApp: <a href="https://wa.me/528443479313">+52 844 347 9313</a></p>
+    <p>Instagram: <a href="https://www.instagram.com/nonna_slw/?hl=es" target="_blank" rel="noopener noreferrer">@nonna_slw</a></p>
+    <span>¡Pregunta por tus pasteles favoritos!</span>
+  </section>
+</main>
+
+<footer>
+  <p>© 2026 Noonas Pastelería · Hecho con 🩷 · Productos frescos todos los días</p>
+</footer>
+
+<script>
+  const API_BASE_URL = 'http://127.0.0.1:8000';
+  const PRODUCTOS_ENDPOINT = '/api/producto/';
+
+  function getFullImageUrl(imageUrl) {
+    if (!imageUrl) return null;
+    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+      return imageUrl;
+    }
+    const base = API_BASE_URL.replace(/\/$/, '');
+    const relativePath = imageUrl.startsWith('/') ? imageUrl : '/' + imageUrl;
+    return base + relativePath;
+  }
+
+  async function cargarProductos() {
+    const gridContainer = document.getElementById('productosGrid');
+    if (!gridContainer) return;
+
+    gridContainer.innerHTML = `<div class="loading-message">⏳ Cargando nuestros pasteles artesanales...</div>`;
+
+    try {
+      const response = await fetch(`${API_BASE_URL}${PRODUCTOS_ENDPOINT}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        let errorDetail = `Error ${response.status}`;
+        try {
+          const errorData = await response.json();
+          errorDetail = errorData.message || errorData.detail || JSON.stringify(errorData);
+        } catch(e) {}
+        throw new Error(`HTTP ${response.status}: ${errorDetail}`);
+      }
+
+      const productos = await response.json();
+
+      if (!Array.isArray(productos)) {
+        throw new Error('La respuesta del API no es una lista de productos');
+      }
+
+      if (productos.length === 0) {
+        gridContainer.innerHTML = `<div class="empty-message">✨ Pronto tendremos nuevos pasteles disponibles. ¡Visítanos pronto! ✨</div>`;
+        return;
+      }
+
+      renderizarProductos(productos, gridContainer);
+
+    } catch (error) {
+      console.error('Error al cargar productos:', error);
+      gridContainer.innerHTML = `<div class="error-message">🍪 Lo sentimos, no pudimos cargar los pasteles. <br> Detalle: ${escapeHtml(error.message)} <br> Verifica tu conexión.</div>`;
+    }
+  }
+
+  function renderizarProductos(productos, container) {
+    let cardsHtml = '';
+
+    for (const prod of productos) {
+      const idProducto = prod.id_producto ?? '?';
+      let nombreProducto = `Pastel #${idProducto}`;
+      let descripcionLarga = prod.descripcion || 'Delicioso pastel artesanal, horneado con amor y los mejores ingredientes.';
+
+      if (prod.descripcion && prod.descripcion.trim().length > 0) {
+        let possibleName = prod.descripcion.trim();
+        if (possibleName.length > 45) {
+          possibleName = possibleName.substring(0, 42) + '...';
+        }
+        nombreProducto = possibleName;
+      } else {
+        nombreProducto = `Especial Noonas`;
+      }
+
+      let precioRaw = prod.precio_unitario;
+      let precioFormateado = '$' + (parseFloat(precioRaw)?.toFixed(2) ?? '0.00');
+      if (isNaN(parseFloat(precioRaw))) {
+        precioFormateado = precioRaw || '$ consultar';
+      }
+
+      let imagenSrc = '';
+      const imageUrlRaw = prod.image_url;
+      if (imageUrlRaw && typeof imageUrlRaw === 'string' && imageUrlRaw.trim() !== '') {
+        imagenSrc = getFullImageUrl(imageUrlRaw);
+      } else if (prod.imagen && typeof prod.imagen === 'string' && prod.imagen.trim() !== '') {
+        imagenSrc = getFullImageUrl(prod.imagen);
+      } else {
+        imagenSrc = 'https://placehold.co/600x400/FFF0E4/B45F2B?text=🍰+Noonas';
+      }
+
+      const isActive = prod.activo !== undefined ? prod.activo : true;
+      const inactiveBadge = !isActive ? '<span style="background:#e0cbbc; font-size:0.7rem; padding:2px 8px; border-radius:50px; margin-left:0.5rem;">Próximamente</span>' : '';
+
+      cardsHtml += `
+        <div class="card">
+          <img src="${escapeHtml(imagenSrc)}" 
+               alt="${escapeHtml(nombreProducto)}"
+               loading="lazy"
+               onerror="this.src='https://placehold.co/600x400/F7E4D4/B45F2B?text=Pastel+Noonas'">
+          <div class="card-body">
+            <h3>${escapeHtml(nombreProducto)} ${inactiveBadge}</h3>
+            <p>${escapeHtml(descripcionLarga.length > 100 ? descripcionLarga.substring(0, 97) + '...' : descripcionLarga)}</p>
+            <span class="price">${escapeHtml(precioFormateado)}</span>
+            <div style="margin-top: 12px; font-size: 0.75rem; color:#a77551;">✨ #${idProducto}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    container.innerHTML = cardsHtml;
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  async function buscarPedido() {
+    const idInput = document.getElementById('orderInput');
+    const id = idInput.value.trim();
+    const result = document.getElementById('orderResult');
+
+    if (!id) {
+      result.textContent = '🍰 Ingresa un número de pedido.';
+      result.className = 'msg-error';
+      return;
+    }
+
+    if (!/^\d+$/.test(id)) {
+      result.textContent = '❌ El número de pedido debe ser un valor numérico.';
+      result.className = 'msg-error';
+      return;
+    }
+
+    result.textContent = '🔎 Buscando pedido...';
+    result.className = 'msg-info';
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/pedidos/${id}`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error(`Pedido #${id} no encontrado.`);
+        } else {
+          let errorMsg = `Error ${response.status}`;
+          try {
+            const errData = await response.json();
+            errorMsg = errData.detail || errData.message || errorMsg;
+          } catch (e) {}
+          throw new Error(errorMsg);
+        }
+      }
+
+      const pedidoData = await response.json();
+      sessionStorage.setItem('pedidoCache', JSON.stringify(pedidoData));
+      window.location.href = `paginaPedido.html?id=${encodeURIComponent(id)}`;
+
+    } catch (error) {
+      console.error('Error al buscar pedido:', error);
+      result.textContent = `❌ ${error.message}`;
+      result.className = 'msg-error';
+    }
+  }
+
+  window.buscarPedido = buscarPedido;
+
+  document.addEventListener('DOMContentLoaded', () => {
+    cargarProductos();
+  });
+</script>
+</body>
+</html>

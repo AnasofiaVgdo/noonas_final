@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+<script>
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: {
+                    "primary": "#5d1927",
+                    "accent": "#febdc6",
+                    "background-light": "#f8f6f6",
+                    "background-dark": "#1f1316",
+                },
+                fontFamily: { "display": ["Plus Jakarta Sans", "sans-serif"] },
+                borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+            },
+        },
+    }
+</script>
+<title>Eliminar Cliente - Nonna</title>
+<style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #febdc6; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    .modal-mensaje { transition: opacity 0.3s ease, visibility 0.3s ease; }
+</style>
+</head>
+<body class="bg-accent min-h-screen flex items-center justify-center p-4">
+
+<!-- TARJETA PRINCIPAL -->
+<div class="fixed inset-0 bg-primary/20 backdrop-blur-sm flex items-center justify-center p-6">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-[520px] overflow-hidden">
+        <!-- Franja superior -->
+        <div class="h-2 w-full bg-primary"></div>
+
+        <div class="p-8 md:p-10 flex flex-col items-center text-center">
+            <!-- Ícono -->
+            <div class="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-6">
+                <span class="material-symbols-outlined text-primary text-5xl">warning</span>
+            </div>
+            <!-- Título -->
+            <h2 class="text-primary text-2xl md:text-3xl font-bold leading-tight mb-3">
+                ¿Eliminar este cliente?
+            </h2>
+            <p class="text-xs font-bold uppercase tracking-widest text-primary/40 mb-6">MÓDULO DE CLIENTES</p>
+
+            <!-- Detalle del cliente -->
+            <div class="w-full bg-primary/5 rounded-lg p-4 mb-8 text-left border border-primary/10">
+                <span class="block text-[10px] font-bold text-primary/50 uppercase tracking-widest mb-1">Nombre Completo</span>
+                <p id="nombre-cliente" class="font-bold text-primary text-base">Cargando...</p>
+            </div>
+
+            <!-- Advertencia -->
+            <p class="text-slate-400 text-xs mb-8">Esta acción no se puede deshacer y borrará todo el historial relacionado.</p>
+
+            <!-- Botones -->
+            <div class="flex flex-col sm:flex-row gap-3 w-full">
+                <a href="clientes.html" class="flex-1 h-12 px-6 rounded-lg border-2 border-primary/20 bg-white text-primary font-bold text-sm hover:bg-primary/5 transition-colors flex items-center justify-center">
+                    No, Mantener
+                </a>
+                <button id="btn-eliminar" class="flex-1 h-12 px-6 rounded-lg bg-primary text-white font-bold text-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2 shadow-lg shadow-primary/20">
+                    <span class="material-symbols-outlined text-xl">delete</span>
+                    Sí, Eliminar
+                </button>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="bg-primary/5 py-3 px-8 text-center border-t border-primary/10">
+            <p class="text-[10px] text-primary/40 uppercase font-bold tracking-[0.2em]">Nonna Administrative Module</p>
+        </div>
+    </div>
+</div>
+
+<!-- MODALES CENTRALES -->
+<div id="modal-exito" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4"><span class="material-symbols-outlined text-green-600 text-5xl">check_circle</span></div>
+        <h3 class="text-xl font-bold text-slate-900">¡Éxito!</h3>
+        <p id="exito-mensaje" class="text-slate-500 mt-2"></p>
+        <button id="btn-cerrar-exito" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Continuar</button>
+    </div>
+</div>
+
+<div id="modal-error" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4"><span class="material-symbols-outlined text-red-600 text-5xl">error</span></div>
+        <h3 class="text-xl font-bold text-slate-900">Error</h3>
+        <p id="error-mensaje" class="text-slate-500 mt-2"></p>
+        <button id="btn-cerrar-error" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Aceptar</button>
+    </div>
+</div>
+
+<div id="modal-warning" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4"><span class="material-symbols-outlined text-amber-600 text-5xl">warning</span></div>
+        <h3 class="text-xl font-bold text-slate-900">Aviso</h3>
+        <p id="warning-mensaje" class="text-slate-500 mt-2"></p>
+        <button id="btn-cerrar-warning" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Aceptar</button>
+    </div>
+</div>
+
+<script>
+    const API_BASE = 'http://127.0.0.1:8000/api';
+    const TOKEN = localStorage.token;
+
+    function getHeaders() {
+        return {
+            'accept': 'application/json',
+            'Authorization': `Bearer ${TOKEN}`,
+            'Content-Type': 'application/json'
+        };
+    }
+
+    function mostrarExito(mensaje, callback) {
+        const modal = document.getElementById('modal-exito');
+        document.getElementById('exito-mensaje').innerText = mensaje;
+        modal.classList.remove('hidden');
+        document.getElementById('btn-cerrar-exito').onclick = () => {
+            modal.classList.add('hidden');
+            if (callback) callback();
+        };
+    }
+
+    function mostrarError(mensaje) {
+        const modal = document.getElementById('modal-error');
+        document.getElementById('error-mensaje').innerText = mensaje;
+        modal.classList.remove('hidden');
+        document.getElementById('btn-cerrar-error').onclick = () => modal.classList.add('hidden');
+    }
+
+    function mostrarWarning(mensaje) {
+        const modal = document.getElementById('modal-warning');
+        document.getElementById('warning-mensaje').innerText = mensaje;
+        modal.classList.remove('hidden');
+        document.getElementById('btn-cerrar-warning').onclick = () => modal.classList.add('hidden');
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const clienteId = urlParams.get('id');
+    if (!clienteId) {
+        mostrarWarning('No se especificó qué cliente eliminar.');
+        setTimeout(() => { window.location.href = 'clientes.html'; }, 2000);
+    }
+
+    async function cargarCliente() {
+        try {
+            const res = await fetch(`${API_BASE}/cliente/${clienteId}`, { headers: getHeaders() });
+            if (!res.ok) throw new Error(`Error ${res.status}`);
+            const cliente = await res.json();
+            const nombreCompleto = `${cliente.nombre || ''} ${cliente.apellido || ''}`.trim() || 'Cliente sin nombre';
+            document.getElementById('nombre-cliente').innerText = nombreCompleto;
+        } catch (error) {
+            console.error(error);
+            document.getElementById('nombre-cliente').innerText = 'Error al cargar datos';
+            mostrarError('No se pudo cargar la información del cliente.');
+        }
+    }
+
+    async function eliminarCliente() {
+        const btn = document.getElementById('btn-eliminar');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<span class="material-symbols-outlined animate-spin text-lg">progress_activity</span> Eliminando...';
+        btn.disabled = true;
+
+        try {
+            const res = await fetch(`${API_BASE}/cliente/${clienteId}`, { method: 'DELETE', headers: getHeaders() });
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.detail || 'Error al eliminar el cliente');
+            }
+            mostrarExito('Cliente eliminado correctamente', () => {
+                window.location.href = 'clientes.html';
+            });
+        } catch (error) {
+            let errorMsg = error.message;
+            if (errorMsg.includes('foreign key') || errorMsg.includes('referenced')) {
+                errorMsg = 'No se puede eliminar este cliente porque tiene pedidos o direcciones asociadas. Elimina esos registros primero.';
+            }
+            mostrarError(`Error: ${errorMsg}`);
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    }
+
+    document.getElementById('btn-eliminar').addEventListener('click', () => {
+        mostrarWarning('¿Estás seguro de que deseas eliminar este cliente? Esta acción no se puede deshacer.');
+        document.getElementById('btn-cerrar-warning').onclick = () => {
+            document.getElementById('modal-warning').classList.add('hidden');
+            eliminarCliente();
+        };
+    });
+
+    cargarCliente();
+</script>
+</body>
+</html>

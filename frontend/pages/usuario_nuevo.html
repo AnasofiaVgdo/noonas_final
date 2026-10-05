@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Registrar Usuario - Nonna DB</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+<script>
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: { "primary": "#5d1927", "accent-pink": "#FEBDC6" },
+                fontFamily: { "sans": ["Montserrat", "sans-serif"] },
+                borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px" },
+            },
+        },
+    }
+</script>
+<style>
+    body { font-family: "Montserrat", sans-serif; background-color: #FEBDC6; }
+    .modal-mensaje {
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    .custom-select {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%235d1927' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+        background-position: right 0.75rem center;
+        background-repeat: no-repeat;
+        background-size: 1.25em 1.25em;
+    }
+</style>
+</head>
+<body class="bg-[#FEBDC6] min-h-screen flex items-center justify-center p-4">
+<div class="bg-white w-full max-w-[900px] rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+    <!-- Header -->
+    <header class="flex items-center justify-between border-b border-slate-100 px-10 py-6 bg-white">
+        <div class="flex items-center gap-4">
+            <div class="bg-primary/10 p-3 rounded-xl text-primary">
+                <span class="material-symbols-outlined text-3xl">person_add</span>
+            </div>
+            <div>
+                <h1 class="text-slate-900 text-2xl font-extrabold tracking-tight">Registrar Nuevo Usuario</h1>
+                <p class="text-slate-500 text-sm">Complete la información para dar de alta el nuevo perfil.</p>
+            </div>
+        </div>
+        <a href="usuarios.html" class="text-slate-400 hover:text-slate-600 transition-colors">
+            <span class="material-symbols-outlined">close</span>
+        </a>
+    </header>
+
+    <main class="flex-1 overflow-y-auto p-10 bg-slate-50/50">
+        <div class="max-w-2xl mx-auto space-y-8">
+            <section class="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm">
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="material-symbols-outlined text-primary">manage_accounts</span>
+                    <h2 class="text-lg font-bold text-slate-900">Datos del Usuario</h2>
+                </div>
+                <form id="form-usuario" class="grid grid-cols-1 gap-6">
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-bold text-slate-700">Nombre Completo *</label>
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xl">person</span>
+                            <input id="nombre" class="w-full rounded-xl border-slate-200 bg-slate-50 pl-11 pr-4 py-3 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="Ej. Juan Pérez" type="text" required>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-bold text-slate-700">Rol del Usuario *</label>
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xl">badge</span>
+                            <select id="id_rol" class="w-full rounded-xl border-slate-200 bg-slate-50 pl-11 pr-10 py-3 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all custom-select" required>
+                                <option value="">Cargando roles...</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-bold text-slate-700">Contraseña *</label>
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xl">lock</span>
+                            <input id="contrasena" class="w-full rounded-xl border-slate-200 bg-slate-50 pl-11 pr-12 py-3 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="••••••••" type="password" required>
+                            <button type="button" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-colors toggle-password">
+                                <span class="material-symbols-outlined text-xl">visibility</span>
+                            </button>
+                        </div>
+                        <p class="text-xs text-slate-400 ml-1">Mínimo 8 caracteres, una mayúscula y un número</p>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Nota de seguridad -->
+            <div class="bg-primary/5 rounded-2xl p-5 border border-primary/10 flex items-start gap-3">
+                <span class="material-symbols-outlined text-primary mt-0.5">info</span>
+                <div class="text-xs text-primary/80 leading-relaxed">
+                    <p class="font-bold mb-1">Nota de seguridad</p>
+                    <p>Las contraseñas deben contener al menos 8 caracteres, incluyendo una letra mayúscula y un número para garantizar la integridad del sistema Nonna DB.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="border-t border-slate-100 p-8 flex justify-end gap-4 bg-white">
+        <a href="usuarios.html" class="px-8 py-3 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-all">Cancelar</a>
+        <button type="submit" form="form-usuario" id="btn-submit" class="px-10 py-3 rounded-xl bg-primary text-white font-bold hover:bg-primary/95 transition-all shadow-lg shadow-primary/30 flex items-center gap-2">
+            <span class="material-symbols-outlined">check_circle</span> Crear Usuario
+        </button>
+    </footer>
+</div>
+
+<!-- MODALES CENTRALES -->
+<div id="modal-exito" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4"><span class="material-symbols-outlined text-green-600 text-5xl">check_circle</span></div>
+        <h3 id="exito-titulo" class="text-xl font-bold text-slate-900">¡Éxito!</h3>
+        <p id="exito-mensaje" class="text-slate-500 mt-2"></p>
+        <button id="btn-cerrar-exito" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Continuar</button>
+    </div>
+</div>
+
+<div id="modal-error" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4"><span class="material-symbols-outlined text-red-600 text-5xl">error</span></div>
+        <h3 class="text-xl font-bold text-slate-900">Error</h3>
+        <p id="error-mensaje" class="text-slate-500 mt-2"></p>
+        <button id="btn-cerrar-error" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Aceptar</button>
+    </div>
+</div>
+
+<div id="modal-warning" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4"><span class="material-symbols-outlined text-amber-600 text-5xl">warning</span></div>
+        <h3 class="text-xl font-bold text-slate-900">Aviso</h3>
+        <p id="warning-mensaje" class="text-slate-500 mt-2"></p>
+        <button id="btn-cerrar-warning" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Aceptar</button>
+    </div>
+</div>
+
+<script>
+    const API_BASE = 'http://127.0.0.1:8000/api';
+    const TOKEN = localStorage.token;
+
+    function getHeaders() {
+        return { 'accept': 'application/json', 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' };
+    }
+
+    // Funciones de modales centrales
+    function mostrarExito(mensaje, callback) {
+        const modal = document.getElementById('modal-exito');
+        document.getElementById('exito-titulo').innerText = '¡Éxito!';
+        document.getElementById('exito-mensaje').innerText = mensaje;
+        modal.classList.remove('hidden');
+        document.getElementById('btn-cerrar-exito').onclick = () => {
+            modal.classList.add('hidden');
+            if (callback) callback();
+        };
+    }
+
+    function mostrarError(mensaje) {
+        const modal = document.getElementById('modal-error');
+        document.getElementById('error-mensaje').innerText = mensaje;
+        modal.classList.remove('hidden');
+        document.getElementById('btn-cerrar-error').onclick = () => modal.classList.add('hidden');
+    }
+
+    function mostrarWarning(mensaje) {
+        const modal = document.getElementById('modal-warning');
+        document.getElementById('warning-mensaje').innerText = mensaje;
+        modal.classList.remove('hidden');
+        document.getElementById('btn-cerrar-warning').onclick = () => modal.classList.add('hidden');
+    }
+
+    function validarContrasena(contrasena) {
+        if (contrasena.length < 8) return { valida: false, mensaje: 'La contraseña debe tener al menos 8 caracteres.' };
+        if (!/[A-Z]/.test(contrasena)) return { valida: false, mensaje: 'La contraseña debe contener al menos una letra mayúscula.' };
+        if (!/[0-9]/.test(contrasena)) return { valida: false, mensaje: 'La contraseña debe contener al menos un número.' };
+        return { valida: true, mensaje: '' };
+    }
+
+    async function cargarRoles() {
+        try {
+            const res = await fetch(`${API_BASE}/rol/`, { headers: getHeaders() });
+            if (!res.ok) throw new Error('Error al cargar roles');
+            const roles = await res.json();
+            const select = document.getElementById('id_rol');
+            select.innerHTML = '<option value="">Seleccione un rol</option>';
+            roles.forEach(rol => {
+                const option = document.createElement('option');
+                option.value = rol.id_rol;
+                option.textContent = rol.descripcion || `Rol ${rol.id_rol}`;
+                select.appendChild(option);
+            });
+        } catch (error) {
+            mostrarError('No se pudieron cargar los roles. Verifique su conexión.');
+            document.getElementById('id_rol').innerHTML = '<option value="">Error al cargar roles</option>';
+        }
+    }
+
+    async function crearUsuario(datos) {
+        const res = await fetch(`${API_BASE}/usuario/`, { method: 'POST', headers: getHeaders(), body: JSON.stringify(datos) });
+        if (!res.ok) { const err = await res.json(); throw new Error(err.detail || 'Error al crear usuario'); }
+        return res.json();
+    }
+
+    const form = document.getElementById('form-usuario');
+    const submitBtn = document.getElementById('btn-submit');
+    let isSubmitting = false;
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (isSubmitting) return;
+        const nombre = document.getElementById('nombre').value.trim();
+        const id_rol = parseInt(document.getElementById('id_rol').value);
+        const contrasena = document.getElementById('contrasena').value;
+
+        if (!nombre) { mostrarWarning('El nombre completo es obligatorio.'); return; }
+        if (!id_rol) { mostrarWarning('Debe seleccionar un rol para el usuario.'); return; }
+        if (!contrasena) { mostrarWarning('La contraseña es obligatoria.'); return; }
+        const validacionPass = validarContrasena(contrasena);
+        if (!validacionPass.valida) { mostrarWarning(validacionPass.mensaje); return; }
+
+        isSubmitting = true;
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<span class="material-symbols-outlined animate-spin text-lg">progress_activity</span> Creando...';
+        submitBtn.disabled = true;
+
+        try {
+            await crearUsuario({ nombre, id_rol, contrasena });
+            mostrarExito(`Usuario "${nombre}" creado correctamente.`, () => {
+                window.location.href = 'usuarios.html';
+            });
+        } catch (error) {
+            let errorMsg = error.message;
+            if (errorMsg.includes('duplicate key') || errorMsg.toLowerCase().includes('unique')) {
+                errorMsg = 'Ya existe un usuario con ese nombre.';
+            }
+            mostrarError(`Error: ${errorMsg}`);
+            isSubmitting = false;
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
+    });
+
+    document.querySelectorAll('.toggle-password').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const input = btn.previousElementSibling;
+            const iconSpan = btn.querySelector('.material-symbols-outlined');
+            if (input.type === 'password') { input.type = 'text'; iconSpan.innerText = 'visibility_off'; }
+            else { input.type = 'password'; iconSpan.innerText = 'visibility'; }
+        });
+    });
+
+    cargarRoles();
+</script>
+</body>
+</html>
